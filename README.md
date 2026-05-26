@@ -1,6 +1,6 @@
 # SenpaiMart
 
-Modern full-stack e-commerce platform built with React, TypeScript, Express.js, and PostgreSQL.
+Modern full-stack E-commerce platform built with React, TypeScript, Express.js, and PostgreSQL.
 
 ## Features
 
@@ -14,7 +14,7 @@ Modern full-stack e-commerce platform built with React, TypeScript, Express.js, 
 - Error tracking & monitoring
 - Responsive modern UI
 
----
+----
 
 ## Tech Stack
 
