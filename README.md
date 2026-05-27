@@ -128,8 +128,3 @@ npm run dev
 - Advanced analytics
 - Payment enhancements
 
----
-
-## License
-
-MIT License
