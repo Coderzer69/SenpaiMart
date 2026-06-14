@@ -11,8 +11,17 @@ import { clerkWebhookHandler } from "./webhooks/clerk";
 import { getEnv } from "./lib/env";
 import keepAliveCron from "./lib/cron";
 
+import productRouter from "./routes/productsRouter";
+import meRouter from "./routes/meRouter";
+import streamRouter from "./routes/streamRouter";
+// import chekoutRouter from "./routes/chekoutRouter";
+// import adminRouter from "./routes/adminRouter";
+// import orderRouter from "./routes/orderRouter";
+
+
 const app = express();  
 const env = getEnv();
+
 const rawJson = express.raw({ type: "application/json", limit: "1mb" });
 
 // it's important that you don't parse the webhook event data, it
@@ -29,6 +38,9 @@ app.use(clerkMiddleware());
 app.get("/health",(_req,res)=>{
   res.json({ok:true});
 }); 
+
+app.use("/api/me",meRouter)
+app.use("/api/products",productRouter)
 
 const publicDir = path.join(process.cwd(), "public");
 
