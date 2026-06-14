@@ -41,6 +41,8 @@ app.get("/health",(_req,res)=>{
 
 app.use("/api/me",meRouter)
 app.use("/api/products",productRouter)
+app.use(streamRouter); 
+
 
 const publicDir = path.join(process.cwd(), "public");
 
