@@ -75,6 +75,9 @@ if (fs.existsSync(publicDir)) {
     res.sendFile(path.join(publicDir, "index.html"), (err) => next(err));
   });
 } 
+app.get("/debug-sentry", (_req: express.Request, _res: express.Response) => {
+  throw new Error("My first Sentry error!");
+});
 
 // sentry will be attached to the response object
 Sentry.setupExpressErrorHandler(app);
