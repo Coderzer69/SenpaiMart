@@ -120,7 +120,9 @@ export async function createCheckout(req: Request, res: Response, next: NextFunc
       .where(eq(checkoutSessions.id, session.id));
 
     res.json({ checkoutUrl: checkout.url });
-  } catch (e) {
-    next(e);
-  }
+ } catch (e) {
+  console.error("Checkout Error:");
+  console.error(e);
+  next(e);
+}
 }

@@ -54,7 +54,7 @@ app.use("/api/products",productRouter)
 app.use("/api/stream",streamRouter); 
 app.use("/api/checkout",checkoutRouter);
 app.use("/api/admin",adminRouter);
-app.use("/api/order",orderRouter);
+app.use("/api/orders",orderRouter);
 
 const publicDir = path.join(process.cwd(), "public");
 
@@ -71,11 +71,13 @@ if (fs.existsSync(publicDir)) {
       next();
       return;
     }
-
     res.sendFile(path.join(publicDir, "index.html"), (err) => next(err));
   });
 } 
 
+app.get("/debug-sentry", (_req: express.Request, _res: express.Response) => {
+  throw new Error("My first Sentry error!");
+});
 // sentry will be attached to the response object
 Sentry.setupExpressErrorHandler(app);
 
