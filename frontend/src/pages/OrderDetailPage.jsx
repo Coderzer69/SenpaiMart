@@ -4,6 +4,7 @@ import { PageError } from "../components/PageError";
 import { useOrderDetailPage } from "../hooks/useOrderDetailPage";
 import {
   ArrowLeftIcon,
+  CalendarIcon,
   HeadphonesIcon,
   LayoutListIcon,
   LockIcon,
@@ -48,16 +49,25 @@ function OrderDetailPage() {
                 Order details
               </p>
 
-              <h1 className="mt-1 font-mono text-2xl font-bold tracking-tight text-base-content sm:text-3xl">
-                #{order.id.slice(0, 8)}
+              <h1 className="mt-1 text-2xl font-bold tracking-tight text-base-content sm:text-[32px]">
+                {items?.[0]?.product?.name || "Order Details"}
               </h1>
 
-              <p className="mt-2 text-sm text-base-content/70">
+              <p className="mt-2 text-[15px] font-medium text-[#6B7280]">
                 {formatOrderWhen(order.createdAt, { dateStyle: "full" })}
               </p>
-              <p className="mt-2 break-all font-mono text-xs text-base-content/45">
-                {order.id}
-              </p>
+              
+              <div className="mt-3 flex w-fit items-center gap-1.5 rounded-lg bg-[#FFF5F2] px-2.5 py-1.5 text-[13px] font-medium text-primary">
+                <CalendarIcon className="size-4" aria-hidden />
+                <span>
+                  Ordered on{" "}
+                  {new Date(order.createdAt).toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </span>
+              </div>
             </div>
 
             <div className="flex flex-col gap-3 border-t border-base-300/80 pt-4 lg:border-t-0 lg:pt-0 lg:text-right">
