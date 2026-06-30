@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState, useMemo } from "react";
 import { ProductPageSkeleton } from "../components/LoadingSkeletons";
 import { PageError } from "../components/PageError";
 import { useProductPage } from "../hooks/useProductPage";
@@ -29,7 +29,7 @@ const HIGHLIGHTS = [
 function ProductDetailPage() {
   const addItem = useCart((s) => s.addItem);
   const toggleItem = useWishlist((s) => s.toggleItem);
-  const { product, isLoading, error } = useProductPage();
+  const { product, variants, isLoading, error } = useProductPage();
   const wishlisted = useWishlist((s) =>
     product ? s.ids.includes(product.id) : false,
   );
@@ -45,6 +45,32 @@ function ProductDetailPage() {
     el.classList.add("heart-pop");
   }, [product, toggleItem]);
 
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+
+  const hasVariants = variants && variants.length > 0;
+  
+  const attributeNames = useMemo(() => {
+    if (!hasVariants) return [];
+    return [...new Set(variants.flatMap(v => v.variantAttributes.map(a => a.name)))];
+  }, [hasVariants, variants]);
+
+  const [selectedOptions, setSelectedOptions] = useState(() => {
+    if (hasVariants) {
+      const defaults = {};
+      variants[0].variantAttributes.forEach(a => defaults[a.name] = a.value);
+      return defaults;
+    }
+    return {};
+  });
+
+  const activeProduct = useMemo(() => {
+    if (!hasVariants) return product;
+    const match = variants.find(v => 
+      v.variantAttributes.every(a => selectedOptions[a.name] === a.value)
+    );
+    return match || variants[0];
+  }, [hasVariants, variants, product, selectedOptions]);
+
   if (isLoading) return <ProductPageSkeleton />;
 
   if (error || !product) {
@@ -56,10 +82,18 @@ function ProductDetailPage() {
     );
   }
 
-  const p = product;
-  const category = p.category ?? "General";
-  const watermarkedFullUrl = p.imageUrl
-    ? imageKitWatermarkedUrl(p.imageUrl, IK_PRESETS.productHero)
+  const p = activeProduct;
+  const category = product.category ?? "General";
+  
+  // Normalize gallery array from new `images` column or legacy `imageUrl`
+  const gallery = p.images?.length > 0 
+    ? p.images 
+    : (p.imageUrl ? [{ url: p.imageUrl }] : (product.images?.length > 0 ? product.images : (product.imageUrl ? [{ url: product.imageUrl }] : [])));
+    
+  const currentImage = gallery[activeImageIndex]?.url;
+  
+  const watermarkedFullUrl = currentImage
+    ? imageKitWatermarkedUrl(currentImage, IK_PRESETS.productHero)
     : null;
 
   return (
@@ -80,34 +114,60 @@ function ProductDetailPage() {
       </nav>
 
       <div className="mt-6 grid gap-8 lg:grid-cols-2 lg:gap-12">
-        <div className="overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-(--shadow-card)">
-          <figure className="aspect-square bg-base-200">
-            {p.imageUrl ? (
-              <img
-                src={imageKitOptimizedUrl(p.imageUrl, IK_PRESETS.productHero)}
-                alt=""
-                className="h-full w-full object-cover"
-                fetchPriority="high"
-                decoding="async"
-              />
-            ) : (
-              <div className="h-full w-full" />
-            )}
-          </figure>
+        <div className="flex flex-col gap-4">
+          <div className="overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-(--shadow-card)">
+            <figure className="aspect-square bg-base-200">
+              {currentImage ? (
+                <img
+                  src={imageKitOptimizedUrl(currentImage, IK_PRESETS.productHero)}
+                  alt=""
+                  className="h-full w-full object-cover transition-opacity duration-300"
+                  fetchPriority="high"
+                  decoding="async"
+                />
+              ) : (
+                <div className="h-full w-full" />
+              )}
+            </figure>
 
-          {watermarkedFullUrl ? (
-            <div className="flex flex-wrap items-center gap-2 border-t border-base-300 px-4 py-3">
-              <a
-                className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
-                href={watermarkedFullUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <ExternalLinkIcon className="size-3.5" aria-hidden />
-                Open full size
-              </a>
+            {watermarkedFullUrl ? (
+              <div className="flex flex-wrap items-center gap-2 border-t border-base-300 px-4 py-3">
+                <a
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+                  href={watermarkedFullUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <ExternalLinkIcon className="size-3.5" aria-hidden />
+                  Open full size
+                </a>
+              </div>
+            ) : null}
+          </div>
+
+          {/* Thumbnails */}
+          {gallery.length > 1 && (
+            <div className="flex flex-wrap gap-2">
+              {gallery.map((img, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setActiveImageIndex(idx)}
+                  className={`relative size-16 overflow-hidden rounded-xl border-2 transition-all ${
+                    activeImageIndex === idx 
+                      ? "border-primary ring-2 ring-primary/20" 
+                      : "border-transparent opacity-60 hover:opacity-100"
+                  }`}
+                >
+                  <img
+                    src={imageKitOptimizedUrl(img.url, IK_PRESETS.formPreview)}
+                    alt={`Thumbnail ${idx + 1}`}
+                    className="size-full object-cover"
+                  />
+                </button>
+              ))}
             </div>
-          ) : null}
+          )}
         </div>
 
         <div className="flex flex-col text-left">
@@ -135,9 +195,45 @@ function ProductDetailPage() {
           <p className="mt-4 text-3xl font-bold tabular-nums text-primary">
             {formatPrice(p.priceCents, p.currency)}
           </p>
+          
+          {hasVariants && (
+            <div className="mt-6 flex flex-col gap-5 border-t border-base-300 pt-5">
+              {attributeNames.map(attrName => {
+                // Get all unique values for this attribute across all variants
+                const uniqueValues = [...new Set(variants.map(v => 
+                  v.variantAttributes.find(a => a.name === attrName)?.value
+                ).filter(Boolean))];
+                
+                return (
+                  <div key={attrName}>
+                    <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted">{attrName}</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {uniqueValues.map(val => {
+                        const isSelected = selectedOptions[attrName] === val;
+                        return (
+                          <button
+                            key={val}
+                            type="button"
+                            onClick={() => setSelectedOptions(prev => ({ ...prev, [attrName]: val }))}
+                            className={`min-w-12 rounded-xl border px-4 py-2 text-sm font-medium transition-all ${
+                              isSelected 
+                                ? "border-primary bg-primary text-primary-content shadow-md" 
+                                : "border-base-300 bg-base-100 text-base-content hover:border-primary/50 hover:bg-base-200"
+                            }`}
+                          >
+                            {val}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
-          <p className="mt-5 text-sm leading-relaxed text-muted md:text-base">
-            {p.description}
+          <p className="mt-6 text-sm leading-relaxed text-muted md:text-base">
+            {product.description}
           </p>
 
           <ul className="mt-6 space-y-2 rounded-2xl border border-base-300 bg-base-200/40 p-4">

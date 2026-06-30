@@ -10,6 +10,9 @@ import {
   ShoppingCartIcon,
   StoreIcon,
   XIcon,
+  BoxesIcon,
+  TagIcon,
+  FolderIcon,
 } from "lucide-react";
 import { Link } from "react-router";
 import { apiFetch } from "../../lib/api.js";
@@ -19,6 +22,9 @@ import BrandLogo from "../BrandLogo.jsx";
 const navItems = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboardIcon },
   { id: "products", label: "Products", icon: PackageIcon },
+  { id: "inventory", label: "Inventory", icon: BoxesIcon },
+  { id: "brands", label: "Brands", icon: TagIcon },
+  { id: "categories", label: "Categories", icon: FolderIcon },
   { id: "orders", label: "Orders", icon: ShoppingCartIcon, href: "/orders" },
   { id: "analytics", label: "Analytics", icon: BarChart3Icon },
 ];

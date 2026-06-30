@@ -1,14 +1,16 @@
 import type { Request, Response, NextFunction } from "express";
 import { db } from "../db";
 import { products } from "../db/schema";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 
 export async function listProducts(req: Request, res: Response, next: NextFunction) {
   try {
     const cat = typeof req.query.category === "string" ? req.query.category.trim() : "";
 
     const activeOnly = eq(products.active, true);
-    const whereClause = cat ? and(activeOnly, eq(products.category, cat)) : activeOnly;
+    const noVariants = isNull(products.parentProductId);
+    const baseWhere = and(activeOnly, noVariants);
+    const whereClause = cat ? and(baseWhere, eq(products.category, cat)) : baseWhere;
 
     const rows = await db
       .select()
@@ -47,7 +49,14 @@ export async function getProductBySlug(req: Request, res: Response, next: NextFu
 
     if (!row || !row.active) return res.status(404).json({ error: "Not found" });
 
-    res.json({ product: row });
+    // Fetch all variants associated with this base product
+    const variants = await db
+      .select()
+      .from(products)
+      .where(and(eq(products.parentProductId, row.id), eq(products.active, true)))
+      .orderBy(products.createdAt);
+
+    res.json({ product: row, variants });
   } catch (e) {
      console.error("PRODUCT ERROR:", e);
     next(e);

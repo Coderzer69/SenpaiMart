@@ -16,14 +16,22 @@ const productCreate = z.object({
   slug: z.string().min(1),
   name: z.string().min(1),
   category: z.string().min(1).default("General"),
+  categoryId: z.string().uuid().optional().nullable(),
+  brandId: z.string().uuid().optional().nullable(),
   description: z.string().default(""),
   priceCents: z.number().int().positive(),
   currency: z.string().min(1).default("usd"),
-  imageUrl: z
-    .union([z.string().url(), z.literal("")])
-    .optional()
-    .nullable(),
+  imageUrl: z.union([z.string().url(), z.literal("")]).optional().nullable(),
   imageKitFileId: z.union([z.string().min(1), z.literal(""), z.null()]).optional(),
+  images: z.array(z.object({
+    url: z.string().url(),
+    fileId: z.string().min(1),
+  })).optional().default([]),
+  parentProductId: z.string().uuid().optional().nullable(),
+  variantAttributes: z.array(z.object({
+    name: z.string().min(1),
+    value: z.string().min(1),
+  })).optional().default([]),
   active: z.boolean().default(true),
 });
 
@@ -34,13 +42,31 @@ function buildProductUpdateSet(body: z.infer<typeof productPatch>) {
   if (body.slug !== undefined) data.slug = body.slug;
   if (body.name !== undefined) data.name = body.name;
   if (body.category !== undefined) data.category = body.category;
+  if (body.categoryId !== undefined) data.categoryId = body.categoryId;
+  if (body.brandId !== undefined) data.brandId = body.brandId;
   if (body.description !== undefined) data.description = body.description;
   if (body.priceCents !== undefined) data.priceCents = body.priceCents;
   if (body.currency !== undefined) data.currency = body.currency;
-  if (body.imageUrl !== undefined) data.imageUrl = body.imageUrl === "" ? null : body.imageUrl;
-  if (body.imageKitFileId !== undefined) {
-    data.imageKitFileId = body.imageKitFileId === "" ? null : body.imageKitFileId;
+  
+  if (body.images !== undefined) {
+    data.images = body.images;
+    if (body.images.length > 0) {
+      data.imageUrl = body.images[0].url;
+      data.imageKitFileId = body.images[0].fileId;
+    } else {
+      data.imageUrl = null;
+      data.imageKitFileId = null;
+    }
+  } else {
+    // Fallback if images array wasn't provided but legacy fields were
+    if (body.imageUrl !== undefined) data.imageUrl = body.imageUrl === "" ? null : body.imageUrl;
+    if (body.imageKitFileId !== undefined) {
+      data.imageKitFileId = body.imageKitFileId === "" ? null : body.imageKitFileId;
+    }
   }
+  
+  if (body.parentProductId !== undefined) data.parentProductId = body.parentProductId;
+  if (body.variantAttributes !== undefined) data.variantAttributes = body.variantAttributes;
   if (body.active !== undefined) data.active = body.active;
   return data;
 }
@@ -174,3 +200,220 @@ export async function deleteAdminProduct(req: Request, res: Response, next: Next
     next(e);
   }
 }
+
+const bulkProductCreate = z.array(productCreate);
+
+export async function bulkImportProducts(req: Request, res: Response, next: NextFunction) {
+  try {
+    const parsed = bulkProductCreate.safeParse(req.body.products);
+    if (!parsed.success) {
+      res.status(400).json({ error: "Invalid body", details: parsed.error.flatten() });
+      return;
+    }
+
+    const itemsToInsert = parsed.data.map((item) => ({
+      ...item,
+      imageUrl: item.imageUrl || null,
+      imageKitFileId: item.imageKitFileId || null,
+    }));
+
+    if (itemsToInsert.length === 0) {
+      res.json({ successCount: 0, skippedSlugs: [] });
+      return;
+    }
+
+    // Deduplicate within the payload itself to avoid Postgres error if payload has duplicate slugs
+    const uniqueItemsMap = new Map();
+    for (const item of itemsToInsert) {
+      if (!uniqueItemsMap.has(item.slug)) {
+        uniqueItemsMap.set(item.slug, item);
+      }
+    }
+    const uniqueItemsToInsert = Array.from(uniqueItemsMap.values());
+
+    const result = await db.transaction(async (tx) => {
+      // Use onConflictDoNothing to skip any products that already exist in DB
+      return await tx
+        .insert(products)
+        .values(uniqueItemsToInsert)
+        .onConflictDoNothing({ target: products.slug })
+        .returning({ slug: products.slug });
+    });
+
+    const insertedSlugs = new Set(result.map((r) => r.slug));
+    
+    // Find skipped slugs (either existed in DB, or duplicate in payload)
+    const skippedSlugs = itemsToInsert
+      .map((i) => i.slug)
+      .filter((slug) => !insertedSlugs.has(slug));
+
+    res.json({ successCount: result.length, skippedSlugs });
+  } catch (e) {
+    next(e);
+  }
+}
+
+// const bulkActionSchema = z.object({
+//   ids: z.array(z.string().uuid()).min(1),
+//   action: z.enum([
+//     "delete",
+//     "archive",
+//     "publish",
+//     "draft",
+//     "change-category",
+//     "change-brand",
+//     "update-price",
+//     "update-stock",
+//   ]),
+//   /** For change-category */
+//   categoryId: z.string().uuid().optional().nullable(),
+//   /** For change-brand */
+//   brandId: z.string().uuid().optional().nullable(),
+//   /** For update-price: new price in cents */
+//   priceCents: z.number().int().positive().optional(),
+//   /** For update-stock: new quantity */
+//   stockQuantity: z.number().int().min(0).optional(),
+// });
+
+// export async function bulkActionAdminProducts(req: Request, res: Response, next: NextFunction) {
+//   try {
+//     const parsed = bulkActionSchema.safeParse(req.body);
+//     if (!parsed.success) {
+//       res.status(400).json({ error: "Invalid body", details: parsed.error.flatten() });
+//       return;
+//     }
+
+//     const { ids, action, categoryId, brandId, priceCents, stockQuantity } = parsed.data;
+//     const { inArray } = await import("drizzle-orm");
+
+//     switch (action) {
+//       case "delete": {
+//         // Respect the existing safety check: can't delete products on orders
+//         const onOrders = await db
+//           .select({ productId: orderItems.productId })
+//           .from(orderItems)
+//           .where(inArray(orderItems.productId, ids));
+//         const blockedIds = new Set(onOrders.map((r) => r.productId));
+//         const deletableIds = ids.filter((id) => !blockedIds.has(id));
+
+//         if (deletableIds.length > 0) {
+//           await db.delete(products).where(inArray(products.id, deletableIds));
+//         }
+
+//         res.json({
+//           updated: deletableIds.length,
+//           skipped: blockedIds.size,
+//           skippedReason: blockedIds.size > 0
+//             ? "Some products are on existing orders and were deactivated instead."
+//             : undefined,
+//         });
+//         break;
+//       }
+
+//       case "archive":
+//         await db.update(products).set({ active: false }).where(inArray(products.id, ids));
+//         res.json({ updated: ids.length });
+//         break;
+
+//       case "publish":
+//         await db.update(products).set({ active: true }).where(inArray(products.id, ids));
+//         res.json({ updated: ids.length });
+//         break;
+
+//       case "draft":
+//         await db.update(products).set({ active: false }).where(inArray(products.id, ids));
+//         res.json({ updated: ids.length });
+//         break;
+
+//       case "change-category":
+//         await db
+//           .update(products)
+//           .set({ categoryId: categoryId ?? null })
+//           .where(inArray(products.id, ids));
+//         res.json({ updated: ids.length });
+//         break;
+
+//       case "change-brand":
+//         await db
+//           .update(products)
+//           .set({ brandId: brandId ?? null })
+//           .where(inArray(products.id, ids));
+//         res.json({ updated: ids.length });
+//         break;
+
+//       case "update-price":
+//         if (priceCents === undefined) {
+//           res.status(400).json({ error: "priceCents required for update-price" });
+//           return;
+//         }
+//         await db.update(products).set({ priceCents }).where(inArray(products.id, ids));
+//         res.json({ updated: ids.length });
+//         break;
+
+//       case "update-stock":
+//         if (stockQuantity === undefined) {
+//           res.status(400).json({ error: "stockQuantity required for update-stock" });
+//           return;
+//         }
+//         await db.update(products).set({ stockQuantity }).where(inArray(products.id, ids));
+//         res.json({ updated: ids.length });
+//         break;
+
+//       default:
+//         res.status(400).json({ error: "Unknown action" });
+//     }
+//   } catch (e) {
+//     next(e);
+//   }
+// }
+
+
+// export async function bulkImportProducts(req: Request, res: Response, next: NextFunction) {
+//   try {
+//     const parsed = bulkProductCreate.safeParse(req.body.products);
+//     if (!parsed.success) {
+//       res.status(400).json({ error: "Invalid body", details: parsed.error.flatten() });
+//       return;
+//     }
+
+//     const itemsToInsert = parsed.data.map((item) => ({
+//       ...item,
+//       imageUrl: item.imageUrl || null,
+//       imageKitFileId: item.imageKitFileId || null,
+//     }));
+
+//     if (itemsToInsert.length === 0) {
+//       res.json({ successCount: 0, skippedSlugs: [] });
+//       return;
+//     }
+
+//     // Deduplicate within the payload itself to avoid Postgres error if payload has duplicate slugs
+//     const uniqueItemsMap = new Map();
+//     for (const item of itemsToInsert) {
+//       if (!uniqueItemsMap.has(item.slug)) {
+//         uniqueItemsMap.set(item.slug, item);
+//       }
+//     }
+//     const uniqueItemsToInsert = Array.from(uniqueItemsMap.values());
+
+//     const result = await db.transaction(async (tx) => {
+//       // Use onConflictDoNothing to skip any products that already exist in DB
+//       return await tx
+//         .insert(products)
+//         .values(uniqueItemsToInsert)
+//         .onConflictDoNothing({ target: products.slug })
+//         .returning({ slug: products.slug });
+//     });
+
+//     const insertedSlugs = new Set(result.map((r) => r.slug));
+    
+//     // Find skipped slugs (either existed in DB, or duplicate in payload)
+//     const skippedSlugs = itemsToInsert
+//       .map((i) => i.slug)
+//       .filter((slug) => !insertedSlugs.has(slug));
+
+//     res.json({ successCount: result.length, skippedSlugs });
+//   } catch (e) {
+//     next(e);
+//   }
+// }

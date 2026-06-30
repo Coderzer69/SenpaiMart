@@ -6,6 +6,9 @@ import { apiFetch } from "../lib/api.js";
 import { AdminDashboardView } from "../components/admin/AdminDashboardView.jsx";
 import { AdminLayout } from "../components/admin/AdminLayout.jsx";
 import { AdminProductsPanel } from "../components/admin/AdminProductsPanel.jsx";
+import { AdminInventoryPanel } from "../components/admin/AdminInventoryPanel.jsx";
+import { AdminBrandsPanel } from "../components/admin/AdminBrandsPanel.jsx";
+import { AdminCategoriesPanel } from "../components/admin/AdminCategoriesPanel.jsx";
 
 function AdminProductsPage() {
   const { getToken, isSignedIn } = useAuth();
@@ -30,12 +33,18 @@ function AdminProductsPage() {
   const pendingOrders =
     ordersData?.orders?.filter((o) => o.status === "pending").length ?? 0;
 
-  const section =
-    activeSection === "products" ? (
-      <AdminProductsPanel />
-    ) : (
-      <AdminDashboardView />
-    );
+  let section;
+  if (activeSection === "products") {
+    section = <AdminProductsPanel />;
+  } else if (activeSection === "inventory") {
+    section = <AdminInventoryPanel />;
+  } else if (activeSection === "brands") {
+    section = <AdminBrandsPanel />;
+  } else if (activeSection === "categories") {
+    section = <AdminCategoriesPanel />;
+  } else {
+    section = <AdminDashboardView />;
+  }
 
   return (
     <AdminLayout

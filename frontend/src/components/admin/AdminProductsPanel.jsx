@@ -6,10 +6,13 @@ import {
   PencilIcon,
   PlusIcon,
   Trash2Icon,
+  DownloadIcon,
 } from "lucide-react";
 import { formatPrice } from "../../utils/format.js";
 import { AdminProductForm } from "../AdminProductForm.jsx";
+import { AdminExportModal } from "./AdminExportModal.jsx";
 import { useAdminShell } from "./AdminShellContext.jsx";
+import { useState } from "react";
 
 export function AdminProductsPanel() {
   const { searchQuery } = useAdminShell();
@@ -24,6 +27,9 @@ export function AdminProductsPanel() {
     deleteMutation,
     getToken,
   } = useAdminProductsPage();
+
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [exportModalOpen, setExportModalOpen] = useState(false);
 
   const filtered = products.filter((p) => {
     if (!searchQuery.trim()) return true;
@@ -40,6 +46,22 @@ export function AdminProductsPanel() {
     deleteMutation.mutate(product.id);
   }
 
+  function toggleSelect(id) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
+  function toggleSelectAll() {
+    if (selectedIds.size === filtered.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filtered.map((p) => p.id)));
+    }
+  }
+
   return (
     <div>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
@@ -51,27 +73,46 @@ export function AdminProductsPanel() {
             Manage your catalog — create, edit, and deactivate items.
           </p>
         </div>
-        <button
-          type="button"
-          className="inline-flex items-center gap-2 rounded-[14px] bg-[#FF6B4A] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#FF6B4A]/90"
-          onClick={() => {
-            setEditing(null);
-            setModalOpen(true);
-          }}
-        >
-          <PlusIcon className="size-4" aria-hidden />
-          Add product
-        </button>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 rounded-[14px] border border-[#E5E7EB] bg-white px-4 py-2.5 text-sm font-semibold text-[#374151] shadow-sm transition hover:bg-[#F8FAFC]"
+            onClick={() => setExportModalOpen(true)}
+          >
+            <DownloadIcon className="size-4" aria-hidden />
+            Export
+          </button>
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 rounded-[14px] bg-[#FF6B4A] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#FF6B4A]/90"
+            onClick={() => {
+              setEditing(null);
+              setModalOpen(true);
+            }}
+          >
+            <PlusIcon className="size-4" aria-hidden />
+            Add product
+          </button>
+        </div>
       </div>
 
       {isLoading ? (
         <AdminProductsTableSkeleton />
       ) : (
         <div className="overflow-hidden rounded-[18px] border border-[#E5E7EB] bg-white shadow-sm">
+
           <div className="overflow-x-auto">
             <table className="w-full min-w-[800px] text-left text-sm">
               <thead>
                 <tr className="border-b border-[#E5E7EB] bg-[#F8FAFC] text-xs font-semibold uppercase tracking-wide text-[#6B7280]">
+                  <th className="px-5 py-3">
+                    <input
+                      type="checkbox"
+                      className="rounded border-[#D1D5DB]"
+                      checked={selectedIds.size === filtered.length && filtered.length > 0}
+                      onChange={toggleSelectAll}
+                    />
+                  </th>
                   <th className="px-5 py-3">Preview</th>
                   <th className="px-5 py-3">Name</th>
                   <th className="px-5 py-3">Category</th>
@@ -99,8 +140,16 @@ export function AdminProductsPanel() {
                   filtered.map((p) => (
                     <tr
                       key={p.id}
-                      className="border-b border-[#E5E7EB]/80 transition hover:bg-[#F8FAFC]"
+                      className={`border-b border-[#E5E7EB]/80 transition hover:bg-[#F8FAFC] ${selectedIds.has(p.id) ? "bg-[#FFF5F3]" : ""}`}
                     >
+                      <td className="px-5 py-4">
+                        <input
+                          type="checkbox"
+                          className="rounded border-[#D1D5DB]"
+                          checked={selectedIds.has(p.id)}
+                          onChange={() => toggleSelect(p.id)}
+                        />
+                      </td>
                       <td className="px-5 py-4">
                         <div className="relative size-14 overflow-hidden rounded-xl border border-[#E5E7EB] bg-[#F8FAFC]">
                           {p.imageUrl ? (
@@ -171,7 +220,7 @@ export function AdminProductsPanel() {
                             onClick={() => handleDeleteProduct(p)}
                           >
                             {deleteMutation.isPending &&
-                            deleteMutation.variables === p.id ? (
+                              deleteMutation.variables === p.id ? (
                               <span className="loading loading-spinner loading-xs" />
                             ) : (
                               <Trash2Icon className="size-3.5" aria-hidden />
@@ -187,7 +236,8 @@ export function AdminProductsPanel() {
             </table>
           </div>
         </div>
-      )}
+      )
+      }
 
       <dialog className={`modal ${modalOpen ? "modal-open" : ""}`}>
         <div className="modal-box max-w-lg rounded-[18px] border border-[#E5E7EB]">
@@ -200,6 +250,9 @@ export function AdminProductsPanel() {
             saving={saveMutation.isPending}
             error={saveMutation.isError}
             getToken={getToken}
+            allProducts={products}
+            saveMutation={saveMutation}
+            deleteMutation={deleteMutation}
             onCancel={() => {
               setModalOpen(false);
               setEditing(null);
@@ -217,6 +270,14 @@ export function AdminProductsPanel() {
           aria-label="Close dialog"
         />
       </dialog>
-    </div>
+
+      <AdminExportModal
+        isOpen={exportModalOpen}
+        onClose={() => setExportModalOpen(false)}
+        allProducts={products}
+        filteredProducts={filtered}
+        selectedIds={selectedIds}
+      />
+    </div >
   );
 }

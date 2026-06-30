@@ -67,6 +67,23 @@ export function AdminDashboardView() {
         </div>
       </header>
 
+      {(m.lowStockCount > 0 || m.outOfStockCount > 0) && (
+        <div className="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-800">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+            <PackageIcon className="size-5" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold">Inventory Alert</h3>
+            <p className="text-xs">
+              You have {m.lowStockCount > 0 ? <strong>{m.lowStockCount} low stock</strong> : ""}
+              {m.lowStockCount > 0 && m.outOfStockCount > 0 ? " and " : ""}
+              {m.outOfStockCount > 0 ? <strong>{m.outOfStockCount} out of stock</strong> : ""} 
+              {" "}products. Please review your inventory.
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <AdminKpiCard
           title="Total revenue"

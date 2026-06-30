@@ -14,6 +14,7 @@ export function useProductPage() {
   return {
     slug,
     product: data?.product ?? null,
+    variants: data?.variants ?? [],
     isLoading,
     error,
   };

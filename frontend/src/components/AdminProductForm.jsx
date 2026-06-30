@@ -1,6 +1,9 @@
-import { useState } from "react";
-import { uploadImageToImageKit } from "../lib/imagekitUpload.js";
+import { useState, useEffect } from "react";
+import { AdminProductImageGallery } from "./admin/AdminProductImageGallery.jsx";
+import { AdminProductVariants } from "./admin/AdminProductVariants.jsx";
 import { IK_PRESETS, imageKitOptimizedUrl } from "../lib/imagekitUrl.js";
+import { useQuery } from "@tanstack/react-query";
+import { apiFetch } from "../lib/api.js";
 
 export function AdminProductForm({
   initial,
@@ -9,22 +12,49 @@ export function AdminProductForm({
   getToken,
   onCancel,
   onSubmit,
+  allProducts,
+  saveMutation,
+  deleteMutation,
 }) {
   const [slug, setSlug] = useState(initial?.slug ?? "");
   const [name, setName] = useState(initial?.name ?? "");
   const [category, setCategory] = useState(initial?.category ?? "General");
+  const [categoryId, setCategoryId] = useState(initial?.categoryId ?? "");
+  const [brandId, setBrandId] = useState(initial?.brandId ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
   const [priceCents, setPriceCents] = useState(
     initial ? String(initial.priceCents / 100) : "",
   );
   const [currency, setCurrency] = useState(initial?.currency ?? "usd");
-  const [imageUrl, setImageUrl] = useState(initial?.imageUrl ?? "");
-  const [imageKitFileId, setImageKitFileId] = useState(
-    initial?.imageKitFileId ?? "",
-  );
   const [active, setActive] = useState(initial?.active ?? true);
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const [uploadError, setUploadError] = useState(null);
+
+  // Seed images array from legacy fields if it's empty but a legacy image exists
+  const defaultImages = initial?.images?.length > 0
+    ? initial.images
+    : (initial?.imageUrl ? [{ url: initial.imageUrl, fileId: initial.imageKitFileId }] : []);
+
+  const [images, setImages] = useState(defaultImages);
+
+  const { data: brandsData } = useQuery({
+    queryKey: ["admin-brands"],
+    queryFn: () => apiFetch("/api/admin/brands", { getToken }),
+  });
+
+  const { data: categoriesData } = useQuery({
+    queryKey: ["admin-categories"],
+    queryFn: () => apiFetch("/api/admin/categories", { getToken }),
+  });
+
+  const brands = brandsData?.brands ?? [];
+  const categoriesList = categoriesData?.categories ?? [];
+
+  // When categoryId changes, automatically update the legacy category string for storefront compatibility
+  useEffect(() => {
+    if (categoryId) {
+      const selected = categoriesList.find((c) => c.id === categoryId);
+      if (selected) setCategory(selected.name);
+    }
+  }, [categoryId, categoriesList]);
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -35,11 +65,12 @@ export function AdminProductForm({
       slug: slug.trim(),
       name: name.trim(),
       category: category.trim() || "General",
+      categoryId: categoryId || null,
+      brandId: brandId || null,
       description: description.trim(),
       priceCents: Math.round(dollars * 100),
       currency: currency.trim().toLowerCase(),
-      imageUrl: imageUrl.trim() || null,
-      imageKitFileId: imageKitFileId.trim() || null,
+      images: images,
       active,
     };
 
@@ -48,16 +79,21 @@ export function AdminProductForm({
       if (body.name !== initial.name) patch.name = body.name;
       if (body.category !== (initial.category ?? "General"))
         patch.category = body.category;
+      if (body.categoryId !== (initial.categoryId ?? null))
+        patch.categoryId = body.categoryId;
+      if (body.brandId !== (initial.brandId ?? null))
+        patch.brandId = body.brandId;
       if (body.description !== initial.description)
         patch.description = body.description;
       if (body.priceCents !== initial.priceCents)
         patch.priceCents = body.priceCents;
       if (body.currency !== initial.currency) patch.currency = body.currency;
-      if ((body.imageUrl ?? "") !== (initial.imageUrl ?? ""))
-        patch.imageUrl = body.imageUrl;
-      if ((body.imageKitFileId ?? null) !== (initial.imageKitFileId ?? null)) {
-        patch.imageKitFileId = body.imageKitFileId;
+
+      // Simple JSON stringify comparison to see if images array changed
+      if (JSON.stringify(body.images) !== JSON.stringify(defaultImages)) {
+        patch.images = body.images;
       }
+
       if (body.active !== initial.active) patch.active = body.active;
       if (Object.keys(patch).length === 0) {
         onCancel();
@@ -66,50 +102,6 @@ export function AdminProductForm({
       onSubmit(patch);
     } else {
       onSubmit(body);
-    }
-  }
-  async function handleImageUpload(e) {
-    console.log("handleImageUpload fired");
-
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    console.log("Selected file:", file);
-
-    e.target.value = "";
-
-    setUploadError(null);
-
-    e.target.value = "";
-    if (!file) return;
-
-    setUploadError(null);
-
-    if (file.size > 10 * 1024 * 1024) {
-      setUploadError("File is too large (max 10MB).");
-      return;
-    }
-
-    const ext = file.name.includes(".")
-      ? file.name.slice(file.name.lastIndexOf("."))
-      : ".jpg";
-    const base = (slug.trim() || "product")
-      .replace(/[^\w-]+/g, "-")
-      .slice(0, 80);
-
-    setUploadingImage(true);
-
-    try {
-      const { url, fileId } = await uploadImageToImageKit(file, getToken, {
-        fileName: `${base}-${Date.now()}${ext}`,
-      });
-
-      setImageUrl(url);
-      setImageKitFileId(fileId ?? "");
-    } catch (err) {
-      setUploadError(err instanceof Error ? err.message : "Upload failed");
-    } finally {
-      setUploadingImage(false);
     }
   }
 
@@ -136,8 +128,41 @@ export function AdminProductForm({
         />
       </label>
 
+      <div className="grid grid-cols-2 gap-2">
+        <label className="form-control w-full">
+          <span className="label-text">Brand</span>
+          <select
+            className="select select-bordered w-full"
+            value={brandId}
+            onChange={(e) => setBrandId(e.target.value)}
+          >
+            <option value="">— None —</option>
+            {brands.map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="form-control w-full">
+          <span className="label-text">Linked Category</span>
+          <select
+            className="select select-bordered w-full"
+            value={categoryId}
+            onChange={(e) => setCategoryId(e.target.value)}
+          >
+            <option value="">— None —</option>
+            {categoriesList.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
       <label className="form-control w-full">
-        <span className="label-text">Category</span>
+        <span className="label-text">Legacy Category (Storefront String)</span>
         <input
           className="input input-bordered w-full"
           value={category}
@@ -182,76 +207,38 @@ export function AdminProductForm({
       </div>
 
       <div className="form-control w-full">
-        <span className="label-text">Image</span>
-        <label className="mb-2 flex cursor-pointer flex-wrap items-center gap-2">
-          <span className="btn btn-secondary btn-sm shrink-0">
-            {uploadingImage ? (
-              <span className="loading loading-spinner loading-xs" />
-            ) : (
-              "Upload to ImageKit"
-            )}
-          </span>
-
-          <span className="text-xs text-base-content/60">
-            PNG, JPG, WebP, GIF · max 10MB
-          </span>
-
-          <input
-            type="file"
-            accept="image/png,image/jpeg,image/webp,image/gif"
-            className="hidden"
-            disabled={uploadingImage || saving}
-            onChange={handleImageUpload}
-          />
-        </label>
-
-        <label className="label py-0">
-          <span className="label-text-alt text-base-content/60">
-            Image URL (any HTTPS URL)
-          </span>
-        </label>
-
-        <input
-          className="input input-bordered w-full"
-          type="url"
-          value={imageUrl}
-          onChange={(e) => {
-            const v = e.target.value;
-            if (v !== imageUrl) setImageKitFileId("");
-            setImageUrl(v);
-          }}
-          placeholder="https://..."
+        <span className="label-text mb-2 font-semibold">Image Gallery</span>
+        <AdminProductImageGallery
+          images={images}
+          onChange={setImages}
+          getToken={getToken}
+          slug={slug}
         />
-
-        {uploadError ? (
-          <span className="mt-1 text-xs text-error" role="alert">
-            {uploadError}
-          </span>
-        ) : null}
-        {imageUrl ? (
-          <div className="mt-2 overflow-hidden rounded-lg border border-base-300 bg-base-200 p-2">
-            <img
-              src={imageKitOptimizedUrl(imageUrl, IK_PRESETS.formPreview)}
-              alt=""
-              className="mx-auto max-h-32 w-auto object-contain"
-              decoding="async"
-            />
-          </div>
-        ) : null}
       </div>
 
-      <label className="label cursor-pointer justify-start gap-3">
+      <label className="label cursor-pointer justify-start gap-3 mt-2">
         <input
           type="checkbox"
           className="toggle toggle-primary"
           checked={active}
           onChange={(e) => setActive(e.target.checked)}
+          disabled={saving}
         />
-        <span className="label-text">Active in store</span>
+        <span className="label-text">Active (visible in store)</span>
       </label>
 
+      {/* Render Variants Configurator only if editing an existing product */}
+      {initial && allProducts && (
+        <AdminProductVariants
+          baseProduct={initial}
+          allProducts={allProducts}
+          saveMutation={saveMutation}
+          deleteMutation={deleteMutation}
+        />
+      )}
+
       {error ? (
-        <div role="alert" className="alert alert-error text-sm">
+        <div className="alert alert-error mt-2 rounded-xl py-2 text-sm shadow-sm">
           Save failed (check slug unique &amp; fields).
         </div>
       ) : null}
@@ -263,7 +250,7 @@ export function AdminProductForm({
         <button
           type="submit"
           className="btn btn-primary"
-          disabled={saving || uploadingImage}
+          disabled={saving}
         >
           {saving ? (
             <span className="loading loading-spinner loading-sm" />

@@ -303,6 +303,8 @@ export function useAdminDashboard(dateRange) {
       sparkCustomers,
       sparkRefunds,
       sparkProducts: salesByDay.map(() => activeProducts),
+      lowStockCount: products.filter(p => p.stockQuantity > 0 && p.stockQuantity <= p.lowStockThreshold).length,
+      outOfStockCount: products.filter(p => p.stockQuantity <= 0).length,
     };
   }, [allOrders, products, dateRange]);
 
