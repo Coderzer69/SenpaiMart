@@ -6,6 +6,10 @@ export const useCart = create(
   persist(
     (set, get) => ({
       items: [],
+      isDrawerOpen: false,
+
+      openDrawer: () => set({ isDrawerOpen: true }),
+      closeDrawer: () => set({ isDrawerOpen: false }),
 
       addItem(productId, qty = 1) {
         const items = [...get().items];
@@ -37,6 +41,9 @@ export const useCart = create(
         set({ items: [] });
       },
     }),
-    { name: "SenpaiMart-cart" },
+    { 
+      name: "SenpaiMart-cart",
+      partialize: (state) => ({ items: state.items }),
+    },
   ),
 );

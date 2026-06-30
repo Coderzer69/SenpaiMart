@@ -19,6 +19,7 @@ import OrderSummaryPage from "./pages/OrderSummaryPage";
 import OrderChatPage from "./pages/OrderChatPage";
 import OrderVideoPage from "./pages/OrderVideoPage";
 import AdminProductsPage from "./pages/AdminProductsPage";
+import WishlistPage from "./pages/WishlistPage";
 
 function App() {
   const { isLoaded, isSignedIn } = useAuth();
@@ -30,6 +31,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/cart" element={<CartPage />} />
+        <Route path="/wishlist" element={<WishlistPage />} />
         <Route path="/product/:slug" element={<ProductDetailPage />} />
         <Route
           path="/orders"

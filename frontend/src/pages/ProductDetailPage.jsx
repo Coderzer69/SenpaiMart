@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { useCallback, useRef } from "react";
 import { ProductPageSkeleton } from "../components/LoadingSkeletons";
 import { PageError } from "../components/PageError";
 import { useProductPage } from "../hooks/useProductPage";
@@ -8,10 +9,12 @@ import {
   imageKitWatermarkedUrl,
 } from "../lib/imagekitUrl";
 import { useCart } from "../store/cart";
+import { useWishlist } from "../store/wishlist";
 import {
   ArrowLeftIcon,
   CheckIcon,
   ExternalLinkIcon,
+  HeartIcon,
   ShoppingCartIcon,
   StarIcon,
 } from "lucide-react";
@@ -25,7 +28,22 @@ const HIGHLIGHTS = [
 
 function ProductDetailPage() {
   const addItem = useCart((s) => s.addItem);
+  const toggleItem = useWishlist((s) => s.toggleItem);
   const { product, isLoading, error } = useProductPage();
+  const wishlisted = useWishlist((s) =>
+    product ? s.ids.includes(product.id) : false,
+  );
+  const heartRef = useRef(null);
+
+  const handleHeartClick = useCallback(() => {
+    if (!product) return;
+    toggleItem(product.id);
+    const el = heartRef.current;
+    if (!el) return;
+    el.classList.remove("heart-pop");
+    void el.offsetWidth;
+    el.classList.add("heart-pop");
+  }, [product, toggleItem]);
 
   if (isLoading) return <ProductPageSkeleton />;
 
@@ -145,6 +163,26 @@ function ProductDetailPage() {
             >
               <ShoppingCartIcon className="size-5" aria-hidden />
               Add to cart
+            </button>
+
+            <button
+              ref={heartRef}
+              type="button"
+              onClick={handleHeartClick}
+              className={`btn gap-2 rounded-2xl border px-6 transition-colors ${
+                wishlisted
+                  ? "border-red-200 bg-red-50 text-red-500 hover:bg-red-100"
+                  : "btn-ghost border-base-300 hover:text-red-500"
+              }`}
+              aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
+            >
+              <HeartIcon
+                className={`size-4 transition-colors ${
+                  wishlisted ? "fill-red-500 text-red-500" : ""
+                }`}
+                aria-hidden
+              />
+              {wishlisted ? "Wishlisted" : "Wishlist"}
             </button>
 
             <Link

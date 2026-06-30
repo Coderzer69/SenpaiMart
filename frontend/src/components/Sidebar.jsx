@@ -40,10 +40,10 @@ function NavLink({ item, onNavigate }) {
     <Link
       to={item.to}
       onClick={onNavigate}
-      className={`flex items-center gap-3 rounded-2xl px-4 py-2.5 text-sm font-medium transition-all ${
+      className={`flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all ${
         isActive
           ? "bg-primary/10 text-primary shadow-sm"
-          : "text-base-content/70 hover:bg-base-200 hover:text-base-content"
+          : "text-[#374151] hover:bg-[#F5F5F7] hover:text-[#111827]"
       }`}
     >
       <item.icon className="size-5 shrink-0" aria-hidden />
@@ -52,7 +52,12 @@ function NavLink({ item, onNavigate }) {
   );
 }
 
-export function Sidebar({ mobileOpen, onClose }) {
+/**
+ * Sidebar — always a slide-in drawer (no persistent desktop column).
+ * Position: fixed, full-height, slides in with CSS transform.
+ * The Layout shifts page content via margin-left to "push" (not overlay) on desktop.
+ */
+export function Sidebar({ open, onClose, sidebarWidth = 272 }) {
   const { getToken, isSignedIn } = useAuth();
   const cartCount = useCart((s) =>
     s.items.reduce((n, line) => n + line.quantity, 0),
@@ -66,139 +71,137 @@ export function Sidebar({ mobileOpen, onClose }) {
 
   const role = meData?.user?.role;
 
-  const panel = (
-    <aside className="flex h-full flex-col bg-base-100">
-      <div className="flex items-center justify-between px-5 py-5 lg:px-6">
-        <Link
-          to="/"
-          onClick={onClose}
-          className="flex items-center gap-2.5 font-bold text-lg text-base-content"
-        >
-          <span className="flex size-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <ShoppingBagIcon className="size-5" aria-hidden />
-          </span>
-          SenpaiMart
-        </Link>
-        <button
-          type="button"
-          className="btn btn-ghost btn-sm btn-square lg:hidden"
-          onClick={onClose}
-          aria-label="Close menu"
-        >
-          <XIcon className="size-5" />
-        </button>
-      </div>
-
-      <nav className="flex-1 space-y-1 overflow-y-auto px-4 py-2">
-        <p className="mb-2 px-4 text-xs font-semibold uppercase tracking-wider text-muted">
-          Menu
-        </p>
-        {mainNav.map((item) => (
-          <NavLink key={item.label} item={item} onNavigate={onClose} />
-        ))}
-
-        <Show when="signed-in">
-          <p className="mb-2 mt-6 px-4 text-xs font-semibold uppercase tracking-wider text-muted">
-            Account
-          </p>
-          {accountNav.map((item) => (
-            <NavLink key={item.label} item={item} onNavigate={onClose} />
-          ))}
-          {role === "admin" ? (
-            <Link
-              to="/admin"
-              onClick={onClose}
-              className="flex items-center gap-3 rounded-2xl px-4 py-2.5 text-sm font-medium text-secondary transition-all hover:bg-secondary/10"
-            >
-              <SettingsIcon className="size-5 shrink-0" aria-hidden />
-              Admin
-            </Link>
-          ) : null}
-        </Show>
-      </nav>
-
-      <div className="space-y-3 p-4">
-        <div className="overflow-hidden rounded-2xl bg-linear-to-br from-primary/15 via-primary/5 to-secondary/10 p-4">
-          <div className="flex items-start gap-3">
-            <SparklesIcon className="size-5 shrink-0 text-primary" aria-hidden />
-            <div>
-              <p className="text-sm font-semibold text-base-content">
-                Premium Support
-              </p>
-              <p className="mt-0.5 text-xs leading-relaxed text-muted">
-                Chat &amp; video help on paid orders
-              </p>
-              <Link
-                to="/orders"
-                onClick={onClose}
-                className="mt-2 inline-flex text-xs font-semibold text-primary hover:underline"
-              >
-                View orders →
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 rounded-2xl border border-base-300 bg-base-200/50 px-4 py-3 text-xs text-muted">
-          <HeadphonesIcon className="size-4 shrink-0 text-primary" aria-hidden />
-          <span>Order-scoped support after checkout</span>
-        </div>
-
-        <Show when="signed-out">
-          <SignInButton mode="modal">
-            <button type="button" className="btn btn-primary btn-sm w-full gap-2">
-              <LogInIcon className="size-4" aria-hidden />
-              Sign in
-            </button>
-          </SignInButton>
-        </Show>
-
-        <Show when="signed-in">
-          <div className="flex items-center gap-3 rounded-2xl border border-base-300 px-3 py-2">
-            <UserButton
-              appearance={{
-                elements: { avatarBox: "h-9 w-9 ring-2 ring-base-300" },
-              }}
-            />
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium">Your account</p>
-              {role === "admin" || role === "support" ? (
-                <span className="badge badge-primary badge-xs capitalize">
-                  {role}
-                </span>
-              ) : (
-                <p className="text-xs text-muted">
-                  {cartCount} item{cartCount === 1 ? "" : "s"} in cart
-                </p>
-              )}
-            </div>
-          </div>
-        </Show>
-      </div>
-    </aside>
-  );
-
   return (
     <>
-      {/* Desktop sidebar */}
-      <div className="hidden w-64 shrink-0 border-r border-base-300 bg-base-100 lg:block xl:w-72">
-        <div className="sticky top-0 h-svh overflow-y-auto">{panel}</div>
-      </div>
+      {/* Backdrop — only visible on small screens (desktop pushes instead) */}
+      <div
+        className={`fixed inset-0 z-30 bg-neutral/30 backdrop-blur-[2px] transition-opacity duration-300 lg:hidden ${
+          open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+        aria-hidden
+        onClick={onClose}
+      />
 
-      {/* Mobile drawer */}
-      {mobileOpen ? (
-        <div className="fixed inset-0 z-50 lg:hidden">
+      {/* Drawer panel */}
+      <aside
+        style={{
+          width: sidebarWidth,
+          transform: open ? "translateX(0)" : `translateX(-${sidebarWidth}px)`,
+        }}
+        className="fixed bottom-0 left-0 top-0 z-40 flex flex-col border-r border-[#E8E8ED] bg-white shadow-[4px_0_24px_-4px_rgba(0,0,0,0.08)] transition-transform duration-300 ease-in-out"
+        aria-label="Site navigation"
+      >
+        {/* Header */}
+        <div className="flex h-14 shrink-0 items-center justify-between border-b border-[#F0F0F5] px-4">
+          <Link
+            to="/"
+            onClick={onClose}
+            className="flex items-center gap-2.5 font-semibold text-[15px] text-[#111827] transition-opacity hover:opacity-80"
+          >
+            <span className="flex size-8 items-center justify-center rounded-xl bg-primary/10 text-primary shadow-sm">
+              <ShoppingBagIcon className="size-4" aria-hidden />
+            </span>
+            SenpaiMart
+          </Link>
           <button
             type="button"
-            className="absolute inset-0 bg-neutral/40 backdrop-blur-sm"
+            className="flex size-8 items-center justify-center rounded-xl text-[#6B7280] transition-colors hover:bg-[#F5F5F7] hover:text-[#111827]"
             onClick={onClose}
-            aria-label="Close menu overlay"
-          />
-          <div className="absolute inset-y-0 left-0 w-72 max-w-[85vw] shadow-2xl">
-            {panel}
-          </div>
+            aria-label="Close menu"
+          >
+            <XIcon className="size-4.5" />
+          </button>
         </div>
-      ) : null}
+
+        {/* Nav links */}
+        <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-4">
+          <p className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-widest text-[#9CA3AF]">
+            Menu
+          </p>
+          {mainNav.map((item) => (
+            <NavLink key={item.label} item={item} onNavigate={onClose} />
+          ))}
+
+          <Show when="signed-in">
+            <p className="mb-1.5 mt-5 px-3 text-[10px] font-semibold uppercase tracking-widest text-[#9CA3AF]">
+              Account
+            </p>
+            {accountNav.map((item) => (
+              <NavLink key={item.label} item={item} onNavigate={onClose} />
+            ))}
+            {role === "admin" ? (
+              <Link
+                to="/admin"
+                onClick={onClose}
+                className="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-secondary transition-all hover:bg-secondary/10"
+              >
+                <SettingsIcon className="size-5 shrink-0" aria-hidden />
+                Admin
+              </Link>
+            ) : null}
+          </Show>
+        </nav>
+
+        {/* Footer cards */}
+        <div className="shrink-0 space-y-2.5 border-t border-[#F0F0F5] p-3">
+          <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-primary/15 via-primary/5 to-secondary/10 p-4">
+            <div className="flex items-start gap-3">
+              <SparklesIcon className="size-5 shrink-0 text-primary" aria-hidden />
+              <div>
+                <p className="text-sm font-semibold text-[#111827]">
+                  Premium Support
+                </p>
+                <p className="mt-0.5 text-xs leading-relaxed text-[#6B7280]">
+                  Chat &amp; video help on paid orders
+                </p>
+                <Link
+                  to="/orders"
+                  onClick={onClose}
+                  className="mt-2 inline-flex text-xs font-semibold text-primary hover:underline"
+                >
+                  View orders →
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 rounded-xl border border-[#E8E8ED] bg-[#F9F9FB] px-4 py-3 text-xs text-[#6B7280]">
+            <HeadphonesIcon className="size-4 shrink-0 text-primary" aria-hidden />
+            <span>Order-scoped support after checkout</span>
+          </div>
+
+          <Show when="signed-out">
+            <SignInButton mode="modal">
+              <button type="button" className="btn btn-primary btn-sm w-full gap-2 rounded-xl">
+                <LogInIcon className="size-4" aria-hidden />
+                Sign in
+              </button>
+            </SignInButton>
+          </Show>
+
+          <Show when="signed-in">
+            <div className="flex items-center gap-3 rounded-xl border border-[#E8E8ED] bg-[#F9F9FB] px-3 py-2.5">
+              <UserButton
+                appearance={{
+                  elements: { avatarBox: "h-9 w-9 ring-2 ring-[#E8E8ED]" },
+                }}
+              />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-[#111827]">Your account</p>
+                {role === "admin" || role === "support" ? (
+                  <span className="badge badge-primary badge-xs capitalize">
+                    {role}
+                  </span>
+                ) : (
+                  <p className="text-xs text-[#6B7280]">
+                    {cartCount} item{cartCount === 1 ? "" : "s"} in cart
+                  </p>
+                )}
+              </div>
+            </div>
+          </Show>
+        </div>
+      </aside>
     </>
   );
 }

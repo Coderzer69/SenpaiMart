@@ -3,7 +3,9 @@ import { useLocation } from "react-router";
 import Footer from "./Footer.jsx";
 import Navbar from "./Navbar.jsx";
 import { Sidebar } from "./Sidebar.jsx";
-import { FloatingCartPanel } from "./FloatingCartPanel.jsx";
+import { CartDrawer } from "./CartDrawer.jsx";
+
+const SIDEBAR_WIDTH = 272; // px — keep in sync with Sidebar.jsx w-68
 
 function Layout({ children }) {
   const location = useLocation();
@@ -13,31 +15,42 @@ function Layout({ children }) {
     return children;
   }
 
-  return (
-    <StoreLayout>{children}</StoreLayout>
-  );
+  return <StoreLayout>{children}</StoreLayout>;
 }
 
 function StoreLayout({ children }) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex min-h-svh bg-base-200 text-base-content">
-      <Sidebar
-        mobileOpen={mobileMenuOpen}
-        onClose={() => setMobileMenuOpen(false)}
+    <div className="relative flex min-h-svh flex-col bg-[#F5F5F7] text-base-content">
+      {/* Sticky navbar — always full width at the top */}
+      <Navbar
+        sidebarOpen={sidebarOpen}
+        onMenuToggle={() => setSidebarOpen((v) => !v)}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <Navbar onMenuOpen={() => setMobileMenuOpen(true)} />
+      {/* Body: sidebar + content side-by-side via CSS transition */}
+      <div className="relative flex flex-1 overflow-x-hidden">
+        {/* Sidebar — slides in from left, pushes content */}
+        <Sidebar
+          open={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          sidebarWidth={SIDEBAR_WIDTH}
+        />
 
-        <div className="flex flex-1 gap-6 px-4 py-6 md:px-6 lg:gap-8">
-          <main className="min-w-0 flex-1">{children}</main>
-          <FloatingCartPanel />
+        {/* Main content area — shifts right when sidebar is open */}
+        <div
+          className="sidebar-content-area flex min-w-0 flex-1 flex-col"
+          style={{ marginLeft: sidebarOpen ? SIDEBAR_WIDTH : 0 }}
+        >
+          <div className="flex flex-1 gap-6 px-4 py-6 md:px-6 lg:gap-8">
+            <main className="min-w-0 flex-1">{children}</main>
+          </div>
+          <Footer />
         </div>
-
-        <Footer />
       </div>
+
+      <CartDrawer />
     </div>
   );
 }

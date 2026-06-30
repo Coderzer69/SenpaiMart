@@ -1,8 +1,10 @@
+import { useCallback, useRef } from "react";
 import { Link } from "react-router";
 import { HeartIcon, ShoppingCartIcon, StarIcon } from "lucide-react";
 import { formatPrice } from "../utils/format.js";
 import { IK_PRESETS, imageKitOptimizedUrl } from "../lib/imagekitUrl.js";
 import { useCart } from "../store/cart.js";
+import { useWishlist } from "../store/wishlist.js";
 
 function displayRating(productId) {
   const seed = String(productId)
@@ -20,9 +22,28 @@ function reviewCount(productId) {
 
 export function CatalogProductCard({ product }) {
   const addItem = useCart((s) => s.addItem);
+  const toggleItem = useWishlist((s) => s.toggleItem);
+  const wishlisted = useWishlist((s) => s.ids.includes(product.id));
+  const heartRef = useRef(null);
   const rating = displayRating(product.id);
   const reviews = reviewCount(product.id);
   const showBadge = product.id.charCodeAt(0) % 3 === 0;
+
+  const handleHeartClick = useCallback(
+    (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleItem(product.id);
+      // Trigger pop animation
+      const el = heartRef.current;
+      if (!el) return;
+      el.classList.remove("heart-pop");
+      // Force reflow so the animation restarts if clicked quickly
+      void el.offsetWidth;
+      el.classList.add("heart-pop");
+    },
+    [product.id, toggleItem],
+  );
 
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-(--shadow-card) transition hover:-translate-y-1 hover:shadow-(--shadow-card-hover)">
@@ -56,12 +77,20 @@ export function CatalogProductCard({ product }) {
         ) : null}
 
         <button
+          ref={heartRef}
           type="button"
-          className="absolute right-3 top-3 flex size-9 items-center justify-center rounded-full bg-base-100/90 text-muted shadow-sm backdrop-blur transition hover:text-primary"
-          aria-label="Add to favorites"
-          onClick={(e) => e.preventDefault()}
+          className={`absolute right-3 top-3 flex size-9 items-center justify-center rounded-full shadow-sm backdrop-blur transition ${
+            wishlisted
+              ? "bg-red-50 text-red-500 hover:bg-red-100"
+              : "bg-base-100/90 text-muted hover:text-red-500"
+          }`}
+          aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
+          onClick={handleHeartClick}
         >
-          <HeartIcon className="size-4" aria-hidden />
+          <HeartIcon
+            className={`size-4 transition-colors ${wishlisted ? "fill-red-500 text-red-500" : ""}`}
+            aria-hidden
+          />
         </button>
       </Link>
 
@@ -104,3 +133,4 @@ export function CatalogProductCard({ product }) {
     </article>
   );
 }
+
