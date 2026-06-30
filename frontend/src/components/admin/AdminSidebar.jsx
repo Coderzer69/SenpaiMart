@@ -7,7 +7,6 @@ import {
   LayoutDashboardIcon,
   PackageIcon,
   SettingsIcon,
-  ShoppingBagIcon,
   ShoppingCartIcon,
   StoreIcon,
   XIcon,
@@ -15,6 +14,7 @@ import {
 import { Link } from "react-router";
 import { apiFetch } from "../../lib/api.js";
 import { useAdminShell } from "./AdminShellContext.jsx";
+import BrandLogo from "../BrandLogo.jsx";
 
 const navItems = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboardIcon },
@@ -91,9 +91,7 @@ export function AdminSidebar({ mobileOpen, onClose }) {
           }}
           className="flex items-center gap-2.5 font-bold text-lg text-[#111827]"
         >
-          <span className="flex size-10 items-center justify-center rounded-2xl bg-[#FF6B4A]/10 text-[#FF6B4A]">
-            <ShoppingBagIcon className="size-5" aria-hidden />
-          </span>
+          <BrandLogo size={36} />
           SenpaiMart
         </Link>
         <button

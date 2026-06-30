@@ -7,6 +7,8 @@ export const useCart = create(
     (set, get) => ({
       items: [],
       isDrawerOpen: false,
+      /** Timestamp (Date.now()) of the last addItem call — used to trigger the toast */
+      lastAddedAt: 0,
 
       openDrawer: () => set({ isDrawerOpen: true }),
       closeDrawer: () => set({ isDrawerOpen: false }),
@@ -19,7 +21,7 @@ export const useCart = create(
         } else {
           items.push({ productId, quantity: qty });
         }
-        set({ items });
+        set({ items, lastAddedAt: Date.now() });
       },
 
       removeItem(productId) {

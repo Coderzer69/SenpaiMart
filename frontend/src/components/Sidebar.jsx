@@ -7,7 +7,6 @@ import {
   LogInIcon,
   PackageIcon,
   SettingsIcon,
-  ShoppingBagIcon,
   ShoppingCartIcon,
   SparklesIcon,
   TagIcon,
@@ -16,6 +15,7 @@ import {
 import { Link, useLocation } from "react-router";
 import { apiFetch } from "../lib/api.js";
 import { useCart } from "../store/cart.js";
+import BrandLogo from "./BrandLogo.jsx";
 
 const mainNav = [
   { to: "/", label: "Home", icon: HomeIcon, end: true },
@@ -98,9 +98,7 @@ export function Sidebar({ open, onClose, sidebarWidth = 272 }) {
             onClick={onClose}
             className="flex items-center gap-2.5 font-semibold text-[15px] text-[#111827] transition-opacity hover:opacity-80"
           >
-            <span className="flex size-8 items-center justify-center rounded-xl bg-primary/10 text-primary shadow-sm">
-              <ShoppingBagIcon className="size-4" aria-hidden />
-            </span>
+            <BrandLogo size={32} />
             SenpaiMart
           </Link>
           <button
