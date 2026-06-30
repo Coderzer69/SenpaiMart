@@ -1,5 +1,6 @@
 import {
   HeadphonesIcon,
+  LockIcon,
   LogInIcon,
   MinusIcon,
   PlusIcon,
@@ -29,10 +30,12 @@ function CartPage() {
   } = useCartPage();
 
   return (
-    <div className="text-left">
-      <h1 className="mb-8 flex items-center gap-2 text-3xl font-bold text-base-content">
-        <ShoppingCartIcon className="size-8 text-primary" aria-hidden />
-        Cart
+    <div className="mx-auto max-w-4xl text-left">
+      <h1 className="mb-8 flex items-center gap-3 text-2xl font-bold text-base-content md:text-3xl">
+        <span className="flex size-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+          <ShoppingCartIcon className="size-5" aria-hidden />
+        </span>
+        Shopping Cart
       </h1>
 
       {items.length === 0 ? (
@@ -42,14 +45,14 @@ function CartPage() {
       ) : productsError ? (
         <PageError message="Could not load product details. Refresh the page or try again shortly." />
       ) : (
-        <div className="grid gap-10 lg:grid-cols-[1fr_320px]">
+        <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
           <ul className="space-y-4">
             {lines.map(({ line, product: p }) => (
               <li
                 key={line.productId}
-                className="card card-side border border-base-300 bg-base-100 shadow-sm"
+                className="flex gap-4 rounded-2xl border border-base-300 bg-base-100 p-4 shadow-(--shadow-card)"
               >
-                <figure className="p-4">
+                <div className="size-24 shrink-0 overflow-hidden rounded-xl bg-base-200">
                   {p?.imageUrl ? (
                     <img
                       src={imageKitOptimizedUrl(
@@ -57,21 +60,19 @@ function CartPage() {
                         IK_PRESETS.cartThumb,
                       )}
                       alt=""
-                      className="h-24 w-24 rounded-box object-cover"
+                      className="size-full object-cover"
                       loading="lazy"
                       decoding="async"
                     />
-                  ) : (
-                    <div className="h-24 w-24 rounded-box bg-base-300" />
-                  )}
-                </figure>
-                <div className="card-body min-w-0 flex-row flex-wrap items-center justify-between gap-4">
-                  <div className="min-w-0 flex-1">
-                    <div className="card-title text-base">
+                  ) : null}
+                </div>
+                <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <div className="font-semibold">
                       {p ? (
                         <Link
                           to={`/product/${p.slug}`}
-                          className="link-hover link-primary"
+                          className="hover:text-primary"
                         >
                           {p.name}
                         </Link>
@@ -80,36 +81,28 @@ function CartPage() {
                       )}
                     </div>
                     {p ? (
-                      <p className="text-sm text-base-content/60">
+                      <p className="text-sm text-muted">
                         {formatPrice(p.priceCents, p.currency)} each
                       </p>
                     ) : null}
-                    <div className="mt-2 flex flex-wrap items-center gap-3">
-                      <span className="text-sm text-base-content/70">Qty</span>
-                      <div className="join border border-base-300">
+                    <div className="mt-2 flex items-center gap-2">
+                      <div className="flex items-center rounded-xl border border-base-300 bg-base-200/50">
                         <button
                           type="button"
-                          className="btn btn-sm join-item gap-0 px-2.5"
+                          className="btn btn-ghost btn-sm btn-square"
                           onClick={() =>
                             setQty(line.productId, line.quantity - 1)
                           }
-                          aria-label={
-                            line.quantity <= 1
-                              ? "Remove from cart"
-                              : "Decrease quantity"
-                          }
+                          aria-label="Decrease quantity"
                         >
                           <MinusIcon className="size-4" aria-hidden />
                         </button>
-                        <span
-                          className="join-item flex min-w-10 items-center justify-center bg-base-200 px-3 text-sm font-medium tabular-nums text-base-content"
-                          aria-live="polite"
-                        >
+                        <span className="min-w-8 text-center text-sm font-medium tabular-nums">
                           {line.quantity}
                         </span>
                         <button
                           type="button"
-                          className="btn btn-sm join-item gap-0 px-2.5"
+                          className="btn btn-ghost btn-sm btn-square"
                           onClick={() =>
                             setQty(
                               line.productId,
@@ -125,15 +118,14 @@ function CartPage() {
                       <button
                         type="button"
                         onClick={() => removeItem(line.productId)}
-                        className="btn btn-ghost btn-square btn-sm text-error hover:bg-error/10"
+                        className="btn btn-ghost btn-sm btn-square text-error"
                         aria-label="Remove from cart"
-                        title="Remove from cart"
                       >
                         <Trash2Icon className="size-4" aria-hidden />
                       </button>
                     </div>
                   </div>
-                  <div className="text-right font-semibold text-base-content">
+                  <div className="text-right text-lg font-bold tabular-nums">
                     {p
                       ? formatPrice(p.priceCents * line.quantity, p.currency)
                       : "-"}
@@ -143,12 +135,25 @@ function CartPage() {
             ))}
           </ul>
 
-          <aside className="card border border-base-300 bg-base-100 p-6 shadow-md">
-            <div className="flex justify-between text-sm">
-              <span className="text-base-content/70">Subtotal</span>
-              <span className="font-semibold text-base-content">
-                {formatPrice(subtotal, lines[0]?.product?.currency ?? "usd")}
-              </span>
+          <aside className="h-fit rounded-2xl border border-base-300 bg-base-100 p-6 shadow-(--shadow-card)">
+            <h2 className="text-lg font-bold">Order Summary</h2>
+            <div className="mt-4 space-y-2 text-sm">
+              <div className="flex justify-between text-muted">
+                <span>Subtotal</span>
+                <span className="font-semibold text-base-content">
+                  {formatPrice(subtotal, lines[0]?.product?.currency ?? "usd")}
+                </span>
+              </div>
+              <div className="flex justify-between text-muted">
+                <span>Shipping</span>
+                <span className="font-medium text-success">Free</span>
+              </div>
+              <div className="flex justify-between border-t border-base-300 pt-3 text-base font-bold">
+                <span>Total</span>
+                <span className="text-primary">
+                  {formatPrice(subtotal, lines[0]?.product?.currency ?? "usd")}
+                </span>
+              </div>
             </div>
 
             <Show when="signed-in">
@@ -157,15 +162,12 @@ function CartPage() {
                 onClick={checkout}
                 disabled={checkoutLoading}
                 aria-busy={checkoutLoading}
-                className="btn btn-primary mt-6 w-full gap-2"
+                className="btn btn-primary mt-6 w-full gap-2 rounded-2xl shadow-md"
               >
                 {checkoutLoading ? (
-                  <span
-                    className="loading loading-spinner loading-sm"
-                    aria-hidden
-                  />
+                  <span className="loading loading-spinner loading-sm" />
                 ) : (
-                  <ShoppingCartIcon className="size-4" aria-hidden />
+                  <LockIcon className="size-4" aria-hidden />
                 )}
                 {checkoutLoading ? "Opening checkout…" : "Checkout securely"}
               </button>
@@ -175,7 +177,7 @@ function CartPage() {
               <SignInButton mode="modal">
                 <button
                   type="button"
-                  className="btn btn-outline btn-primary mt-6 w-full gap-2"
+                  className="btn btn-outline btn-primary mt-6 w-full gap-2 rounded-2xl"
                 >
                   <LogInIcon className="size-4" aria-hidden />
                   Sign in to checkout
@@ -183,7 +185,7 @@ function CartPage() {
               </SignInButton>
             </Show>
 
-            <p className="mt-4 flex items-start gap-2 text-xs text-base-content/60">
+            <p className="mt-4 flex items-start gap-2 text-xs text-muted">
               <HeadphonesIcon
                 className="mt-0.5 size-3.5 shrink-0 text-primary"
                 aria-hidden
@@ -191,7 +193,6 @@ function CartPage() {
               <span>
                 After payment, open your order for{" "}
                 <strong className="text-base-content">support chat</strong>.
-                Video invites appear in that thread.
               </span>
             </p>
           </aside>
@@ -200,4 +201,5 @@ function CartPage() {
     </div>
   );
 }
+
 export default CartPage;

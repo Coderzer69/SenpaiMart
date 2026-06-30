@@ -1,19 +1,36 @@
 import { Link } from "react-router";
-import { PlusIcon } from "lucide-react";
+import { HeartIcon, ShoppingCartIcon, StarIcon } from "lucide-react";
 import { formatPrice } from "../utils/format.js";
 import { IK_PRESETS, imageKitOptimizedUrl } from "../lib/imagekitUrl.js";
 import { useCart } from "../store/cart.js";
 
+function displayRating(productId) {
+  const seed = String(productId)
+    .split("")
+    .reduce((a, c) => a + c.charCodeAt(0), 0);
+  return (4 + (seed % 10) / 10).toFixed(1);
+}
+
+function reviewCount(productId) {
+  const seed = String(productId)
+    .split("")
+    .reduce((a, c) => a + c.charCodeAt(0), 0);
+  return 12 + (seed % 180);
+}
+
 export function CatalogProductCard({ product }) {
   const addItem = useCart((s) => s.addItem);
+  const rating = displayRating(product.id);
+  const reviews = reviewCount(product.id);
+  const showBadge = product.id.charCodeAt(0) % 3 === 0;
 
   return (
-    <article className="card group h-full overflow-hidden border border-base-300 bg-base-100 shadow-md transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-xl">
+    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-(--shadow-card) transition hover:-translate-y-1 hover:shadow-(--shadow-card-hover)">
       <Link
         to={`/product/${product.slug}`}
         className="relative block overflow-hidden"
       >
-        <figure className="aspect-4/3 bg-base-300">
+        <figure className="aspect-square bg-base-200">
           {product.imageUrl ? (
             <img
               src={imageKitOptimizedUrl(
@@ -21,37 +38,66 @@ export function CatalogProductCard({ product }) {
                 IK_PRESETS.catalogCard,
               )}
               alt=""
-              className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+              className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
               loading="lazy"
               decoding="async"
             />
-          ) : null}
+          ) : (
+            <div className="flex h-full items-center justify-center text-muted">
+              No image
+            </div>
+          )}
         </figure>
-        <span className="badge badge-sm absolute left-3 top-3 border-0 bg-base-100/90 text-xs font-medium text-base-content/80 backdrop-blur">
-          {product.category ?? "General"}
-        </span>
+
+        {showBadge ? (
+          <span className="absolute left-3 top-3 rounded-xl bg-primary px-2.5 py-1 text-xs font-bold text-primary-content shadow-sm">
+            Featured
+          </span>
+        ) : null}
+
+        <button
+          type="button"
+          className="absolute right-3 top-3 flex size-9 items-center justify-center rounded-full bg-base-100/90 text-muted shadow-sm backdrop-blur transition hover:text-primary"
+          aria-label="Add to favorites"
+          onClick={(e) => e.preventDefault()}
+        >
+          <HeartIcon className="size-4" aria-hidden />
+        </button>
       </Link>
-      <div className="card-body grow gap-3 p-5 text-left">
+
+      <div className="flex flex-1 flex-col gap-2 p-4">
+        <p className="text-xs font-medium text-muted">
+          {product.category ?? "General"}
+        </p>
+
         <Link
           to={`/product/${product.slug}`}
-          className="card-title line-clamp-2 text-lg transition group-hover:text-primary"
+          className="line-clamp-2 text-sm font-semibold leading-snug text-base-content transition group-hover:text-primary"
         >
           {product.name}
         </Link>
-        <p className="line-clamp-3 text-sm leading-relaxed text-base-content/70">
-          {product.description}
-        </p>
-        <div className="card-actions mt-auto items-center justify-between border-t border-base-200 pt-4">
+
+        <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-0.5 text-amber-400">
+            <StarIcon className="size-3.5 fill-current" aria-hidden />
+            <span className="text-xs font-semibold text-base-content">
+              {rating}
+            </span>
+          </div>
+          <span className="text-xs text-muted">({reviews})</span>
+        </div>
+
+        <div className="mt-auto flex items-center justify-between gap-2 pt-2">
           <span className="text-lg font-bold tabular-nums text-base-content">
             {formatPrice(product.priceCents, product.currency)}
           </span>
           <button
             type="button"
             onClick={() => addItem(product.id)}
-            className="btn btn-primary btn-sm gap-1 shadow"
+            className="btn btn-primary btn-sm btn-square rounded-xl shadow-sm"
+            aria-label={`Add ${product.name} to cart`}
           >
-            <PlusIcon className="size-4" aria-hidden />
-            Add
+            <ShoppingCartIcon className="size-4" aria-hidden />
           </button>
         </div>
       </div>

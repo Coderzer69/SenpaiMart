@@ -1,63 +1,56 @@
 import { Link } from "react-router";
-import { ArrowRightIcon, SparklesIcon } from "lucide-react";
+import { ArrowRightIcon } from "lucide-react";
 
-export function HomeHero({ categories, loadingCategories }) {
+export function HomeHero() {
   return (
-    <section className="relative overflow-hidden rounded-box border border-base-300 bg-linear-to-br from-base-100 via-base-100 to-primary/10 shadow-lg">
-      <div
-        className="absolute right-0 top-0 h-64 w-64 translate-x-1/4 -translate-y-1/4 rounded-full bg-primary/10 blur-3xl"
-        aria-hidden
-      />
-
-      <div className="relative grid gap-8 p-8 md:grid-cols-2 md:items-center md:p-12 lg:p-14">
-        <div className="text-left">
-          <h1 className="text-3xl font-bold tracking-tight text-base-content md:text-4xl lg:text-5xl">
-            Hardware &amp; workspace,{" "}
-            <span className="text-primary">ready to ship</span>
+    <section className="relative overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-(--shadow-card)">
+      <div className="grid gap-0 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="flex flex-col justify-center p-8 md:p-10 lg:p-12">
+          <span className="text-xs font-bold uppercase tracking-[0.2em] text-primary">
+            New Collection
+          </span>
+          <h1 className="mt-3 text-3xl font-extrabold leading-tight tracking-tight text-base-content md:text-4xl lg:text-[2.75rem]">
+            Find Your Style,
+            <br />
+            <span className="text-primary">Love Your Look</span>
           </h1>
-
-          <p className="mt-4 max-w-lg text-base leading-relaxed text-base-content/70">
-            Audio, wearables, workspace, and travel—curated for work and home.
-            Secure checkout; after payment, use your order page for support chat
-            and video.
+          <p className="mt-4 max-w-md text-sm leading-relaxed text-muted md:text-base">
+            Curated audio, workspace, and lifestyle products with secure checkout.
+            After payment, get priority support chat and video on your order page.
           </p>
-
-          <div className="mt-6 flex flex-wrap gap-3">
-            <a href="#catalog" className="btn btn-primary gap-2 shadow-md">
-              Shop catalog
+          <div className="mt-7 flex flex-wrap gap-3">
+            <a
+              href="#catalog"
+              className="btn btn-primary gap-2 rounded-2xl px-6 shadow-md"
+            >
+              Shop Now
               <ArrowRightIcon className="size-4" aria-hidden />
             </a>
-
-            <Link to="/cart" className="btn btn-outline btn-primary">
-              View cart
+            <Link
+              to="/cart"
+              className="btn btn-ghost gap-2 rounded-2xl border border-base-300 px-6"
+            >
+              View Cart
             </Link>
           </div>
         </div>
 
-        <div className="grid gap-3">
-          <div className="stat rounded-box border border-base-300 bg-base-100/80 px-4 py-3 shadow-sm">
-            <div className="stat-title text-xs uppercase text-base-content/50">
-              Categories
-            </div>
-
-            <div className="stat-value text-2xl text-secondary">
-              {loadingCategories ? (
-                <span
-                  className="skeleton inline-block h-8 w-10 rounded"
-                  aria-hidden
-                />
-              ) : (
-                categories.length
-              )}
-            </div>
-
-            <div className="stat-desc text-xs">Curated groups</div>
-          </div>
-
-          <div className="rounded-box border border-dashed border-primary/30 bg-primary/5 px-4 py-3">
-            <div className="flex items-center gap-2 text-sm font-medium text-base-content">
-              <SparklesIcon className="size-4 text-primary" aria-hidden />
-              Secure checkout · Priority support on paid orders
+        <div className="relative min-h-[220px] bg-linear-to-br from-primary/20 via-secondary/10 to-base-200 lg:min-h-[320px]">
+          <div
+            className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(255,107,74,0.35),transparent_55%)]"
+            aria-hidden
+          />
+          <div className="absolute inset-0 flex items-end justify-center p-8">
+            <div className="w-full max-w-sm rounded-2xl border border-white/60 bg-base-100/90 p-4 shadow-lg backdrop-blur">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted">
+                Featured
+              </p>
+              <p className="mt-1 text-lg font-bold text-base-content">
+                Premium picks, ready to ship
+              </p>
+              <p className="mt-1 text-sm text-muted">
+                Secure payments · Human support on every paid order
+              </p>
             </div>
           </div>
         </div>

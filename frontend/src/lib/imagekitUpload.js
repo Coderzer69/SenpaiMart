@@ -6,6 +6,15 @@ export async function uploadImageToImageKit(file, getToken, opts = {}) {
   const { folder = "products", fileName } = opts;
   const auth = await apiFetch("/api/admin/imagekit/auth", { getToken });
 
+  if (
+    !auth?.publicKey ||
+    !auth?.signature ||
+    !auth?.token ||
+    auth.expire == null
+  ) {
+    throw new Error("ImageKit authentication failed");
+  }
+
   // replace unsafe characters with _.
   // example: "my photo @ home.png" becomes "my_photo___home.png"
   const safeName =
@@ -24,8 +33,14 @@ export async function uploadImageToImageKit(file, getToken, opts = {}) {
   const data = await res.json();
 
   if (!res.ok) {
+    const message =
+      typeof data?.message === "string"
+        ? data.message
+        : typeof data?.error === "string"
+          ? data.error
+          : "ImageKit upload failed";
     console.log("[ImageKit upload]", res.status, data);
-    throw new Error("ImageKit upload failed");
+    throw new Error(message);
   }
 
   if (!data.url) {

@@ -68,12 +68,11 @@ function OrdersPage() {
               <li key={o.id}>
                 <Link
                   to={`/orders/${o.id}`}
-                  className="group card border border-base-300 bg-base-100 shadow-sm transition hover:border-primary/45 hover:shadow-md"
+                  className="group flex flex-wrap items-center gap-4 rounded-2xl border border-base-300 bg-base-100 p-5 shadow-(--shadow-card) transition hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-(--shadow-card-hover) sm:gap-5"
                 >
-                  <div className="card-body flex-row flex-wrap items-center gap-4 py-5 sm:gap-5">
-                    <OrderPreview items={previewItems} />
+                  <OrderPreview items={previewItems} />
 
-                    <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="font-mono text-xs text-base-content/55 sm:text-sm">
                           {o.id.slice(0, 8)}…
@@ -115,7 +114,6 @@ function OrdersPage() {
                         aria-hidden
                       />
                     </div>
-                  </div>
                 </Link>
               </li>
             );

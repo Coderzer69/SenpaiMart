@@ -52,6 +52,11 @@ function buildTrSegment({ w, h, q = 80, f = "auto", crop, watermark = false }) {
   return `${base}:${buildNorthwindTextLayer({ w, h })}`;
 }
 
+/** @param {string} segment */
+function isTransformPathSegment(segment) {
+  return /^tr:/i.test(segment);
+}
+
 /**
  * @param {string} url
  * @returns {boolean}
@@ -90,7 +95,7 @@ export function imageKitOptimizedUrl(url, opts = {}) {
       if (segments.length < 2) return url;
       const id = segments[0];
       const rest = segments.slice(1);
-      while (rest.length && rest[0].toLowerCase().startsWith("tr")) {
+      while (rest.length && isTransformPathSegment(rest[0])) {
         rest.shift();
       }
       if (!rest.length) return url;
@@ -105,7 +110,7 @@ export function imageKitOptimizedUrl(url, opts = {}) {
       if (!u.pathname.startsWith(basePath)) return url;
       const rel = u.pathname.slice(basePath.length).replace(/^\//, "");
       const relSegs = rel.split("/").filter(Boolean);
-      while (relSegs.length && relSegs[0].toLowerCase().startsWith("tr")) {
+      while (relSegs.length && isTransformPathSegment(relSegs[0])) {
         relSegs.shift();
       }
       if (!relSegs.length) return url;

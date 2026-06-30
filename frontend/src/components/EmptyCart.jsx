@@ -15,7 +15,7 @@ export default function EmptyCart() {
         when you are.
       </p>
       <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:justify-center">
-        <Link to="/#catalog" className="btn btn-primary gap-2 shadow-md">
+        <Link to="/#catalog" className="btn btn-primary gap-2 rounded-2xl shadow-md">
           Browse catalog
           <ArrowRightIcon className="size-4" aria-hidden />
         </Link>

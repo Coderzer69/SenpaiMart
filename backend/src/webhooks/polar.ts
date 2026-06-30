@@ -80,6 +80,8 @@ async function fulfillCheckoutSession(
 }
 
 export async function polarWebhookHandler(req: Request, res: Response) {
+  console.log("🔥 Polar webhook HIT");
+
   const env = getEnv();
 
   try {
