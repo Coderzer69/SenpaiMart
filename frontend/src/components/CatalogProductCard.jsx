@@ -29,6 +29,10 @@ export function CatalogProductCard({ product }) {
   const reviews = reviewCount(product.id);
   const showBadge = product.id.charCodeAt(0) % 3 === 0;
 
+  const primaryImageUrl = product.images?.length > 0 
+    ? product.images[0].url 
+    : product.imageUrl;
+
   const handleHeartClick = useCallback(
     (e) => {
       e.preventDefault();
@@ -52,10 +56,10 @@ export function CatalogProductCard({ product }) {
         className="relative block overflow-hidden"
       >
         <figure className="aspect-square bg-base-200">
-          {product.imageUrl ? (
+          {primaryImageUrl ? (
             <img
               src={imageKitOptimizedUrl(
-                product.imageUrl,
+                primaryImageUrl,
                 IK_PRESETS.catalogCard,
               )}
               alt=""

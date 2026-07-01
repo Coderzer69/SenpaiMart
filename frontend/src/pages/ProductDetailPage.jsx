@@ -57,7 +57,8 @@ function ProductDetailPage() {
   const [selectedOptions, setSelectedOptions] = useState(() => {
     if (hasVariants) {
       const defaults = {};
-      variants[0].variantAttributes.forEach(a => defaults[a.name] = a.value);
+      const availableVariant = variants.find(v => v.stockQuantity > 0) || variants[0];
+      availableVariant.variantAttributes.forEach(a => defaults[a.name] = a.value);
       return defaults;
     }
     return {};
@@ -195,6 +196,13 @@ function ProductDetailPage() {
           <p className="mt-4 text-3xl font-bold tabular-nums text-primary">
             {formatPrice(p.priceCents, p.currency)}
           </p>
+
+          <div className="mt-2 flex flex-col gap-1 text-sm text-muted">
+            <p>SKU: <span className="font-medium text-base-content">{p.slug}</span></p>
+            <p>Availability: <span className={`font-medium ${p.stockQuantity > 0 ? "text-success" : "text-error"}`}>
+              {p.stockQuantity > 0 ? `${p.stockQuantity} in stock` : "Out of stock"}
+            </span></p>
+          </div>
           
           {hasVariants && (
             <div className="mt-6 flex flex-col gap-5 border-t border-base-300 pt-5">
@@ -210,15 +218,25 @@ function ProductDetailPage() {
                     <div className="flex flex-wrap gap-2">
                       {uniqueValues.map(val => {
                         const isSelected = selectedOptions[attrName] === val;
+                        // Find if this option combination is in stock
+                        const nextOptions = { ...selectedOptions, [attrName]: val };
+                        const matchingVariant = variants.find(v => 
+                          v.variantAttributes.every(a => nextOptions[a.name] === a.value)
+                        );
+                        const isOutOfStock = matchingVariant ? matchingVariant.stockQuantity <= 0 : true;
+
                         return (
                           <button
                             key={val}
                             type="button"
+                            disabled={isOutOfStock}
                             onClick={() => setSelectedOptions(prev => ({ ...prev, [attrName]: val }))}
                             className={`min-w-12 rounded-xl border px-4 py-2 text-sm font-medium transition-all ${
                               isSelected 
                                 ? "border-primary bg-primary text-primary-content shadow-md" 
-                                : "border-base-300 bg-base-100 text-base-content hover:border-primary/50 hover:bg-base-200"
+                                : isOutOfStock
+                                  ? "border-base-200 bg-base-100 text-muted opacity-50 cursor-not-allowed"
+                                  : "border-base-300 bg-base-100 text-base-content hover:border-primary/50 hover:bg-base-200"
                             }`}
                           >
                             {val}
@@ -254,11 +272,12 @@ function ProductDetailPage() {
           <div className="mt-8 flex flex-wrap gap-3">
             <button
               type="button"
+              disabled={p.stockQuantity <= 0}
               onClick={() => addItem(p.id)}
-              className="btn btn-primary gap-2 rounded-2xl px-8 shadow-md"
+              className="btn btn-primary gap-2 rounded-2xl px-8 shadow-md disabled:bg-base-300 disabled:text-muted disabled:shadow-none"
             >
               <ShoppingCartIcon className="size-5" aria-hidden />
-              Add to cart
+              {p.stockQuantity > 0 ? "Add to cart" : "Out of stock"}
             </button>
 
             <button

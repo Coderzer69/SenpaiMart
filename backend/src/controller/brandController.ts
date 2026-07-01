@@ -1,7 +1,8 @@
 import type { Request, Response, NextFunction } from "express";
 import { db } from "../db";
 import { brands, products } from "../db/schema";
-import { count, desc, eq, ilike, or } from "drizzle-orm";
+// import { count, desc, eq, ilike, or } from "drizzle-orm";
+import { count, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { deleteImageKitAsset } from "../lib/imagekit";
 import { getEnv } from "../lib/env";
@@ -18,8 +19,7 @@ const brandCreate = z.object({
 });
 
 const brandPatch = brandCreate.partial();
-
-export async function listAdminBrands(req: Request, res: Response, next: NextFunction) {
+export async function listAdminBrands(_req: Request, res: Response, next: NextFunction) {
   try {
     const rows = await db.select().from(brands).orderBy(desc(brands.createdAt));
 
@@ -64,7 +64,11 @@ export async function createAdminBrand(req: Request, res: Response, next: NextFu
   }
 }
 
-export async function updateAdminBrand(req: Request, res: Response, next: NextFunction) {
+export async function updateAdminBrand(
+  req: Request<{ id: string }>,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const parsed = brandPatch.safeParse(req.body);
     if (!parsed.success) {
@@ -78,11 +82,12 @@ export async function updateAdminBrand(req: Request, res: Response, next: NextFu
     }
     if (data.logoUrl === "") data.logoUrl = null;
     if (data.logoKitFileId === "") data.logoKitFileId = null;
+    const id = req.params.id;
 
     const [row] = await db
       .update(brands)
       .set(data as any)
-      .where(eq(brands.id, req.params.id))
+      .where(eq(brands.id, id))
       .returning();
 
     if (!row) {
@@ -94,8 +99,11 @@ export async function updateAdminBrand(req: Request, res: Response, next: NextFu
     next(e);
   }
 }
-
-export async function deleteAdminBrand(req: Request, res: Response, next: NextFunction) {
+export async function deleteAdminBrand(
+  req: Request<{ id: string }>,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const id = req.params.id;
     const [existing] = await db.select().from(brands).where(eq(brands.id, id)).limit(1);
@@ -105,7 +113,9 @@ export async function deleteAdminBrand(req: Request, res: Response, next: NextFu
     }
 
     // Detach products from this brand (cascade set null handled by DB)
-    await deleteImageKitAsset(env, existing.logoKitFileId);
+    if (existing.logoKitFileId) {
+      await deleteImageKitAsset(env, existing.logoKitFileId);
+    }
     await db.delete(brands).where(eq(brands.id, id));
 
     res.json({ ok: true });

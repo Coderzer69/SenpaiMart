@@ -1,7 +1,8 @@
 import type { Request, Response, NextFunction } from "express";
 import { db } from "../db";
 import { categories, products } from "../db/schema";
-import { count, desc, eq, isNull } from "drizzle-orm";
+// import { count, desc, eq, isNull } from "drizzle-orm";
+import { count, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 
 const categoryCreate = z.object({
@@ -59,7 +60,12 @@ export async function createAdminCategory(req: Request, res: Response, next: Nex
   }
 }
 
-export async function updateAdminCategory(req: Request, res: Response, next: NextFunction) {
+// export async function updateAdminCategory(req: Request, res: Response, next: NextFunction)
+export async function updateAdminCategory(
+  req: Request<{ id: string }>,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const parsed = categoryPatch.safeParse(req.body);
     if (!parsed.success) {
@@ -74,10 +80,12 @@ export async function updateAdminCategory(req: Request, res: Response, next: Nex
     if (data.imageUrl === "") data.imageUrl = null;
     if (data.parentId === "") data.parentId = null;
 
+    const id = req.params.id;
+
     const [row] = await db
       .update(categories)
       .set(data as any)
-      .where(eq(categories.id, req.params.id))
+      .where(eq(categories.id, id))
       .returning();
 
     if (!row) {
@@ -90,7 +98,12 @@ export async function updateAdminCategory(req: Request, res: Response, next: Nex
   }
 }
 
-export async function deleteAdminCategory(req: Request, res: Response, next: NextFunction) {
+// export async function deleteAdminCategory(req: Request, res: Response, next: NextFunction)
+export async function deleteAdminCategory(
+  req: Request<{ id: string }>,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const id = req.params.id;
     const [existing] = await db.select().from(categories).where(eq(categories.id, id)).limit(1);
