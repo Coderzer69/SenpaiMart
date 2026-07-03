@@ -134,8 +134,10 @@ export function imageKitWatermarkedUrl(url, opts = {}) {
 
 /** Presets aligned to layout (2× for retina where useful). */
 export const IK_PRESETS = {
-  /** Catalog cards ~4:3, max column ~400px */
-  catalogCard: { w: 800, h: 600, q: 80, f: "auto" },
+  /** Catalog cards — fixed-height container, object-contain; 600×600 square
+   *  gives the best coverage for both portrait and landscape product images.
+   *  CSS handles framing; ImageKit only needs to cap the pixel dimensions. */
+  catalogCard: { w: 600, h: 600, q: 82, f: "auto" },
   /** Product detail hero */
   productHero: { w: 1200, h: 1200, q: 82, f: "auto" },
   /** Admin table ~56–72px boxes */

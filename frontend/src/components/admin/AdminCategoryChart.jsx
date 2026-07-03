@@ -8,14 +8,14 @@ export function AdminCategoryChart({ categories, totalRevenue }) {
     : [{ name: "No sales yet", cents: 0 }];
   const total = entries.reduce((s, c) => s + c.cents, 0) || 1;
 
-  let cumulative = 0;
-  const segments = entries.map((entry, i) => {
+  const { segments } = entries.reduce((acc, entry, i) => {
     const pct = entry.cents / total;
-    const start = cumulative * 360;
-    cumulative += pct;
-    const end = cumulative * 360;
-    return { ...entry, pct, start, end, color: COLORS[i % COLORS.length] };
-  });
+    const start = acc.cumulative * 360;
+    const end = (acc.cumulative + pct) * 360;
+    acc.segments.push({ ...entry, pct, start, end, color: COLORS[i % COLORS.length] });
+    acc.cumulative += pct;
+    return acc;
+  }, { cumulative: 0, segments: [] });
 
   function arcPath(cx, cy, r, startAngle, endAngle) {
     const start = (startAngle - 90) * (Math.PI / 180);

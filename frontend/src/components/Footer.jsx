@@ -51,6 +51,7 @@ function FooterLink({ to, children }) {
 }
 
 /* ── icon pill with soft glow on hover ────────────────────────────────── */
+// eslint-disable-next-line no-unused-vars
 function IconPill({ icon: Icon, children }) {
   return (
     <li className="flex items-start gap-2.5">
@@ -71,6 +72,7 @@ function IconPill({ icon: Icon, children }) {
 }
 
 export default function Footer() {
+  // eslint-disable-next-line no-unused-vars
   const { ref, visible } = useFadeInOnScroll(0.1);
 
   const colBase =
@@ -129,6 +131,7 @@ export default function Footer() {
                 { icon: ShieldCheckIcon, label: "Secure" },
                 { icon: ZapIcon,         label: "Fast delivery" },
               ].map(({ icon: Icon, label }) => (
+                // eslint-disable-next-line no-unused-vars
                 <span
                   key={label}
                   className="

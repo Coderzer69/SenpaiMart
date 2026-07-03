@@ -9,6 +9,7 @@ export function SearchBar({ className = "" }) {
   const [query, setQuery] = useState(urlQuery);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setQuery(urlQuery);
   }, [urlQuery]);
 

@@ -140,7 +140,7 @@ export function AdminCategoriesPanel() {
     }
   }
 
-  const SortIcon = ({ col }) =>
+  const renderSortIcon = (col) =>
     sortBy === col ? (
       <span className="ml-1 text-[#FF6B4A]">{sortDir === "asc" ? "↑" : "↓"}</span>
     ) : (
@@ -272,11 +272,11 @@ export function AdminCategoriesPanel() {
                   </th>
                   <th className="px-4 py-3">Image</th>
                   <th className="cursor-pointer px-4 py-3 select-none hover:text-[#111827]" onClick={() => handleSort("name")}>
-                    Name <SortIcon col="name" />
+                    Name {renderSortIcon("name")}
                   </th>
                   <th className="px-4 py-3">Parent</th>
                   <th className="cursor-pointer px-4 py-3 select-none text-right hover:text-[#111827]" onClick={() => handleSort("products")}>
-                    Products <SortIcon col="products" />
+                    Products {renderSortIcon("products")}
                   </th>
                   <th className="px-4 py-3 text-center">Status</th>
                   <th className="px-4 py-3"><span className="sr-only">Actions</span></th>

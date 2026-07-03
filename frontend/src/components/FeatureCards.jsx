@@ -34,6 +34,7 @@ export function FeatureCards() {
   return (
     <section className="grid gap-4 sm:grid-cols-3">
       {features.map(({ icon: Icon, title, desc, iconBg, link }) => (
+        // eslint-disable-next-line no-unused-vars
         <Link
           key={title}
           to={link}

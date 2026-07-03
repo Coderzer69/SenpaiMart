@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/react";
 import { apiFetch } from "../../lib/api.js";
 import { AdminProductsTableSkeleton } from "../LoadingSkeletons.jsx";

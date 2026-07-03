@@ -7,15 +7,19 @@ import {
   PlusIcon,
   Trash2Icon,
   DownloadIcon,
+  UploadIcon,
 } from "lucide-react";
 import { formatPrice } from "../../utils/format.js";
 import { AdminProductForm } from "../AdminProductForm.jsx";
 import { AdminExportModal } from "./AdminExportModal.jsx";
+import { AdminBulkImportModal } from "./AdminBulkImportModal.jsx";
 import { useAdminShell } from "./AdminShellContext.jsx";
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function AdminProductsPanel() {
   const { searchQuery } = useAdminShell();
+  const queryClient = useQueryClient();
   const {
     modalOpen,
     setModalOpen,
@@ -30,6 +34,13 @@ export function AdminProductsPanel() {
 
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [importModalOpen, setImportModalOpen] = useState(false);
+
+  function handleImportSuccess() {
+    queryClient.invalidateQueries({ queryKey: ["admin", "products"] });
+    queryClient.invalidateQueries({ queryKey: ["products"] });
+    queryClient.invalidateQueries({ queryKey: ["product-categories"] });
+  }
 
   const filtered = products.filter((p) => {
     if (!searchQuery.trim()) return true;
@@ -81,6 +92,14 @@ export function AdminProductsPanel() {
           >
             <DownloadIcon className="size-4" aria-hidden />
             Export
+          </button>
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 rounded-[14px] border border-[#E5E7EB] bg-white px-4 py-2.5 text-sm font-semibold text-[#374151] shadow-sm transition hover:bg-[#F8FAFC]"
+            onClick={() => setImportModalOpen(true)}
+          >
+            <UploadIcon className="size-4" aria-hidden />
+            Import
           </button>
           <button
             type="button"
@@ -278,6 +297,13 @@ export function AdminProductsPanel() {
         filteredProducts={filtered}
         selectedIds={selectedIds}
       />
-    </div >
+
+      <AdminBulkImportModal
+        isOpen={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        getToken={getToken}
+        onImportSuccess={handleImportSuccess}
+      />
+    </div>
   );
 }

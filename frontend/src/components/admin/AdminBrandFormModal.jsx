@@ -23,6 +23,7 @@ export function AdminBrandFormModal({ isOpen, editing, saving, error, onClose, o
 
   useEffect(() => {
     if (editing) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setForm({
         name: editing.name ?? "",
         slug: editing.slug ?? "",

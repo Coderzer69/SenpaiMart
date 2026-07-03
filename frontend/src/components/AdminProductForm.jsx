@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { AdminProductImageGallery } from "./admin/AdminProductImageGallery.jsx";
 import { AdminProductVariants } from "./admin/AdminProductVariants.jsx";
-import { IK_PRESETS, imageKitOptimizedUrl } from "../lib/imagekitUrl.js";
+import { IK_PRESETS } from "../lib/imagekitUrl.js";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "../lib/api.js";
 
@@ -52,6 +52,7 @@ export function AdminProductForm({
   useEffect(() => {
     if (categoryId) {
       const selected = categoriesList.find((c) => c.id === categoryId);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (selected) setCategory(selected.name);
     }
   }, [categoryId, categoriesList]);
@@ -128,7 +129,7 @@ export function AdminProductForm({
         />
       </label>
 
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-2">
         <label className="form-control w-full">
           <span className="label-text">Brand</span>
           <select
@@ -181,7 +182,7 @@ export function AdminProductForm({
         />
       </label>
 
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-2">
         <label className="form-control">
           <span className="label-text">Price (USD)</span>
           <input

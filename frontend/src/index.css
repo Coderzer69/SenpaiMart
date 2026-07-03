@@ -69,6 +69,41 @@ body {
   animation: heart-pop 280ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
 
+/* ── Catalog product card — image container ─────────────────────────────── */
+/* Fixed height keeps every card uniform regardless of original image ratio. */
+/* object-contain ensures the full product is visible without cropping.      */
+.catalog-card-img-wrap {
+  position: relative;
+  height: 220px;          /* mobile */
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+@media (min-width: 640px) {
+  .catalog-card-img-wrap {
+    height: 250px;         /* tablet */
+    padding: 14px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .catalog-card-img-wrap {
+    height: 260px;         /* desktop */
+    padding: 16px;
+  }
+}
+
+.catalog-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;    /* show full product, no cropping */
+  object-position: center;
+  display: block;
+}
+
 /* ── Sidebar push-layout ────────────────────────────────────────────────── */
 /* Ensures Tailwind includes the transition-[margin-left] utility            */
 .sidebar-content-area {

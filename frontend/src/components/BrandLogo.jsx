@@ -9,7 +9,7 @@
  */
 const BrandLogo = ({ size = 36, className = "", ...props }) => (
   <img
-    src="/logo.png"
+    src="/logo-cropped.png"
     alt="SenpaiMart logo"
     width={size}
     height={size}

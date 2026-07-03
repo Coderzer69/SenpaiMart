@@ -18,6 +18,7 @@ export function AdminKpiCard({
   title,
   value,
   growth,
+  // eslint-disable-next-line no-unused-vars
   icon: Icon,
   iconBg,
   iconColor,

@@ -95,11 +95,9 @@ export function AdminBrandsPanel() {
     deleteMutation.mutate(brand.id);
   }
 
-  const SortIcon = ({ col }) =>
+  const renderSortIcon = (col) =>
     sortBy === col ? (
-      <span className="ml-1 inline-block text-[#FF6B4A]">
-        {sortDir === "asc" ? "↑" : "↓"}
-      </span>
+      <span className="ml-1 text-[#FF6B4A]">{sortDir === "asc" ? "↑" : "↓"}</span>
     ) : (
       <ArrowUpDownIcon className="ml-1 inline-block size-3 text-[#9CA3AF]" />
     );
@@ -194,18 +192,12 @@ export function AdminBrandsPanel() {
               <thead>
                 <tr className="border-b border-[#E5E7EB] bg-[#F8FAFC] text-xs font-semibold uppercase tracking-wide text-[#6B7280]">
                   <th className="px-5 py-3">Brand</th>
-                  <th
-                    className="px-5 py-3 cursor-pointer select-none hover:text-[#111827]"
-                    onClick={() => handleSort("name")}
-                  >
-                    Name <SortIcon col="name" />
+                  <th className="cursor-pointer px-4 py-3 select-none hover:text-[#111827]" onClick={() => handleSort("name")}>
+                    Name {renderSortIcon("name")}
                   </th>
                   <th className="px-5 py-3">Description</th>
-                  <th
-                    className="px-5 py-3 cursor-pointer select-none hover:text-[#111827] text-right"
-                    onClick={() => handleSort("products")}
-                  >
-                    Products <SortIcon col="products" />
+                  <th className="cursor-pointer px-4 py-3 select-none text-right hover:text-[#111827]" onClick={() => handleSort("products")}>
+                    Products {renderSortIcon("products")}
                   </th>
                   <th className="px-5 py-3 text-center">Status</th>
                   <th className="px-5 py-3">

@@ -15,6 +15,7 @@ import { useWishlist } from "../store/wishlist.js";
 import BrandLogo from "./BrandLogo.jsx";
 import { CartToast } from "./CartToast.jsx";
 import { SearchBar } from "./SearchBar.jsx";
+import { NotificationDropdown } from "./NotificationDropdown.jsx";
 
 const Navbar = ({ sidebarOpen, onMenuToggle }) => {
   const { getToken, isSignedIn, user } = useAuth();
@@ -50,16 +51,15 @@ const Navbar = ({ sidebarOpen, onMenuToggle }) => {
 
   return (
     <header
-      className={`sticky top-0 z-40 backdrop-blur-md transition-all duration-400 ease-out border-b ${
-        scrolled
-          ? "border-base-300/80 bg-white/85 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]"
-          : "border-transparent bg-[#F5F5F7]/80 shadow-none"
-      }`}
+      className={`sticky top-0 z-40 backdrop-blur-md transition-all duration-400 ease-out border-b ${scrolled
+        ? "border-base-300/80 bg-white/85 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]"
+        : "border-transparent bg-[#F5F5F7]/80 shadow-none"
+        }`}
       style={{ WebkitBackdropFilter: "blur(12px)" }}
     >
       {/* ── Desktop row (md+): 3-col grid ───────────────────────────────── */}
       <div className="hidden h-[70px] items-center px-5 md:grid md:[grid-template-columns:1fr_auto_1fr]">
-        
+
         {/* Col 1 — Left: hamburger + logo */}
         <div className="flex items-center gap-[14px]">
           <button
@@ -120,14 +120,7 @@ const Navbar = ({ sidebarOpen, onMenuToggle }) => {
           </Link>
 
           {/* Notifications */}
-          <button
-            type="button"
-            className="group flex size-9 items-center justify-center rounded-xl text-[#6B7280] transition-all duration-300 hover:bg-black/5 hover:text-[#111827] active:scale-95"
-            aria-label="Notifications"
-            title="Order updates appear in My Orders"
-          >
-            <BellIcon className="size-5 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12" aria-hidden />
-          </button>
+          <NotificationDropdown />
 
           {/* Cart — desktop */}
           <div className="relative">
@@ -214,7 +207,7 @@ const Navbar = ({ sidebarOpen, onMenuToggle }) => {
             aria-label="SenpaiMart home"
           >
             <div className="transition-transform duration-400 ease-out group-hover:-rotate-6 group-hover:scale-110">
-              <BrandLogo size={30} aria-hidden />
+              <BrandLogo size={31} aria-hidden />
             </div>
             <span className="text-[21px] font-bold tracking-tight">
               <span className="text-[#1E293B] transition-colors duration-300 group-hover:text-black">Senpai</span>
@@ -241,6 +234,8 @@ const Navbar = ({ sidebarOpen, onMenuToggle }) => {
               </span>
             ) : null}
           </Link>
+          {/* Notifications — mobile */}
+          <NotificationDropdown />
 
           {/* Cart — mobile */}
           <div className="relative">

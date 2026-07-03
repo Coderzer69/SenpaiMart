@@ -77,7 +77,7 @@ function WishlistPage() {
         <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <li key={i}>
-              <div className="skeleton aspect-[4/5] w-full rounded-2xl" />
+              <div className="skeleton h-[330px] w-full rounded-2xl sm:h-[358px] lg:h-[368px]" />
             </li>
           ))}
         </ul>

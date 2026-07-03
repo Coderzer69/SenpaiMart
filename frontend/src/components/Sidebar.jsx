@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { Show, SignInButton, useAuth, UserButton } from "@clerk/react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -40,11 +41,10 @@ function NavLink({ item, onNavigate }) {
     <Link
       to={item.to}
       onClick={onNavigate}
-      className={`flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all ${
-        isActive
-          ? "bg-primary/10 text-primary shadow-sm"
-          : "text-[#374151] hover:bg-[#F5F5F7] hover:text-[#111827]"
-      }`}
+      className={`flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all ${isActive
+        ? "bg-primary/10 text-primary shadow-sm"
+        : "text-[#374151] hover:bg-[#F5F5F7] hover:text-[#111827]"
+        }`}
     >
       <item.icon className="size-5 shrink-0" aria-hidden />
       {item.label}
@@ -75,9 +75,8 @@ export function Sidebar({ open, onClose, sidebarWidth = 272 }) {
     <>
       {/* Backdrop — only visible on small screens (desktop pushes instead) */}
       <div
-        className={`fixed inset-0 z-30 bg-neutral/30 backdrop-blur-[2px] transition-opacity duration-300 lg:hidden ${
-          open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
+        className={`fixed inset-0 z-30 bg-neutral/30 backdrop-blur-[2px] transition-opacity duration-300 lg:hidden ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          }`}
         aria-hidden
         onClick={onClose}
       />
@@ -98,7 +97,7 @@ export function Sidebar({ open, onClose, sidebarWidth = 272 }) {
             onClick={onClose}
             className="flex items-center gap-2.5 font-semibold text-[15px] text-[#111827] transition-opacity hover:opacity-80"
           >
-            <BrandLogo size={32} />
+            <BrandLogo size={34} />
             SenpaiMart
           </Link>
           <button

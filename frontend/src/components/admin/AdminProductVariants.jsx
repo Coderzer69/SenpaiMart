@@ -177,8 +177,9 @@ export function AdminProductVariants({
       {/* Existing Variants Table */}
       {existingVariants.length > 0 && (
         <div className="rounded-xl border border-[#E5E7EB] bg-white overflow-hidden">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-[#F8FAFC] text-xs font-semibold text-[#6B7280] uppercase">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm min-w-[500px]">
+              <thead className="bg-[#F8FAFC] text-xs font-semibold text-[#6B7280] uppercase">
               <tr>
                 <th className="px-4 py-3 border-b border-[#E5E7EB]">Variant</th>
                 <th className="px-4 py-3 border-b border-[#E5E7EB]">Price</th>
@@ -210,7 +211,8 @@ export function AdminProductVariants({
                 </tr>
               ))}
             </tbody>
-          </table>
+            </table>
+          </div>
         </div>
       )}
     </div>

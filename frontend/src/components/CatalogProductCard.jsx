@@ -55,21 +55,20 @@ export function CatalogProductCard({ product }) {
         to={`/product/${product.slug}`}
         className="relative block overflow-hidden"
       >
-        <figure className="aspect-square bg-base-200">
+        {/* Image container — fixed height keeps all cards uniform; object-contain shows full product */}
+        <figure className="catalog-card-img-wrap bg-base-200">
           {primaryImageUrl ? (
-            <img
-              src={imageKitOptimizedUrl(
-                primaryImageUrl,
-                IK_PRESETS.catalogCard,
-              )}
-              alt=""
-              className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-              loading="lazy"
-              decoding="async"
-            />
+            <div className="h-full w-full overflow-hidden rounded-[18px]">
+              <img
+                src={imageKitOptimizedUrl(primaryImageUrl, IK_PRESETS.catalogCard)}
+                alt={product.name}
+                className="catalog-card-img transition-transform duration-500 group-hover:scale-105"
+                loading="lazy"
+              />
+            </div>
           ) : (
-            <div className="flex h-full items-center justify-center text-muted">
-              No image
+            <div className="flex h-full w-full items-center justify-center rounded-[18px] bg-base-300">
+              <span className="text-sm font-medium text-muted">No image</span>
             </div>
           )}
         </figure>
@@ -98,7 +97,7 @@ export function CatalogProductCard({ product }) {
         </button>
       </Link>
 
-      <div className="flex flex-1 flex-col gap-2 p-4">
+      <div className="flex flex-1 flex-col gap-2 p-4 pt-3">
         <p className="text-xs font-medium text-muted">
           {product.category ?? "General"}
         </p>

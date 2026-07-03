@@ -1,7 +1,6 @@
 import { Show, UserButton, useAuth } from "@clerk/react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  BarChart3Icon,
   ChevronDownIcon,
   CrownIcon,
   LayoutDashboardIcon,
@@ -26,7 +25,6 @@ const navItems = [
   { id: "brands", label: "Brands", icon: TagIcon },
   { id: "categories", label: "Categories", icon: FolderIcon },
   { id: "orders", label: "Orders", icon: ShoppingCartIcon, href: "/orders" },
-  { id: "analytics", label: "Analytics", icon: BarChart3Icon },
 ];
 
 function NavItem({ item, isActive, onNavigate }) {
@@ -54,11 +52,10 @@ function NavItem({ item, isActive, onNavigate }) {
         onSectionChange(item.id);
         onNavigate?.();
       }}
-      className={`${baseClass} ${
-        isActive
-          ? "bg-[#FF6B4A]/10 text-[#FF6B4A] shadow-sm"
-          : "text-[#6B7280] hover:bg-[#F8FAFC] hover:text-[#111827]"
-      }`}
+      className={`${baseClass} ${isActive
+        ? "bg-[#FF6B4A]/10 text-[#FF6B4A] shadow-sm"
+        : "text-[#6B7280] hover:bg-[#F8FAFC] hover:text-[#111827]"
+        }`}
       aria-current={isActive ? "page" : undefined}
     >
       <item.icon className="size-[18px] shrink-0" aria-hidden />
@@ -97,7 +94,7 @@ export function AdminSidebar({ mobileOpen, onClose }) {
           }}
           className="flex items-center gap-2.5 font-bold text-lg text-[#111827]"
         >
-          <BrandLogo size={36} />
+          <BrandLogo size={38} />
           SenpaiMart
         </Link>
         <button
@@ -118,11 +115,7 @@ export function AdminSidebar({ mobileOpen, onClose }) {
           <NavItem
             key={item.id}
             item={item}
-            isActive={
-              item.id === "analytics"
-                ? activeSection === "analytics"
-                : activeSection === item.id
-            }
+            isActive={activeSection === item.id}
             onNavigate={onClose}
           />
         ))}
