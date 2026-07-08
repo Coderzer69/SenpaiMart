@@ -23,12 +23,14 @@ export function CartDrawer() {
   } = useFloatingCart();
   const [checkoutLoading, setCheckoutLoading] = useState(false);
 
+
   // Close drawer on route change
   useEffect(() => {
     closeDrawer();
   }, [location.pathname, closeDrawer]);
 
   async function checkout() {
+
     setCheckoutLoading(true);
     try {
       const body = {
@@ -54,18 +56,16 @@ export function CartDrawer() {
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 z-50 bg-black/20 backdrop-blur-[2px] transition-opacity duration-300 ${
-          isDrawerOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
+        className={`fixed inset-0 z-50 bg-black/20 backdrop-blur-[2px] transition-opacity duration-300 ${isDrawerOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          }`}
         aria-hidden
         onClick={closeDrawer}
       />
 
       {/* Drawer */}
       <aside
-        className={`fixed bottom-0 right-0 top-0 z-50 flex w-[360px] max-w-[100vw] flex-col bg-white shadow-2xl transition-transform duration-300 ease-in-out ${
-          isDrawerOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed bottom-0 right-0 top-0 z-50 flex w-[360px] max-w-[100vw] flex-col bg-white shadow-2xl transition-transform duration-300 ease-in-out ${isDrawerOpen ? "translate-x-0" : "translate-x-full"
+          }`}
         aria-label="Shopping Cart"
       >
         {/* Header */}

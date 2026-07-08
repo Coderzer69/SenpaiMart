@@ -153,14 +153,12 @@ export function AdminBrandFormModal({ isOpen, editing, saving, error, onClose, o
               role="switch"
               aria-checked={form.active}
               onClick={() => setForm((p) => ({ ...p, active: !p.active }))}
-              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
-                form.active ? "bg-[#FF6B4A]" : "bg-[#D1D5DB]"
-              }`}
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${form.active ? "bg-[#FF6B4A]" : "bg-[#D1D5DB]"
+                }`}
             >
               <span
-                className={`pointer-events-none inline-block size-5 rounded-full bg-white shadow ring-0 transition-transform duration-200 ${
-                  form.active ? "translate-x-5" : "translate-x-0"
-                }`}
+                className={`pointer-events-none inline-block size-5 rounded-full bg-white shadow ring-0 transition-transform duration-200 ${form.active ? "translate-x-5" : "translate-x-0"
+                  }`}
               />
             </button>
           </div>

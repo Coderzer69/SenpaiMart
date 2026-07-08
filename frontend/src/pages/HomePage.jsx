@@ -59,11 +59,10 @@ function HomePage() {
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
-              className={`rounded-xl px-3 py-1.5 text-sm font-medium transition ${
-                !categoryFilter
-                  ? "bg-primary text-primary-content shadow-sm"
-                  : "border border-base-300 bg-base-100 text-muted hover:text-base-content"
-              }`}
+              className={`rounded-xl px-3 py-1.5 text-sm font-medium transition ${!categoryFilter
+                ? "bg-primary text-primary-content shadow-sm"
+                : "border border-base-300 bg-base-100 text-muted hover:text-base-content"
+                }`}
               onClick={() => setCategory("")}
             >
               All
@@ -71,26 +70,25 @@ function HomePage() {
 
             {categoryChipsLoading
               ? [1, 2, 3, 4].map((i) => (
-                  <div
-                    key={i}
-                    className="skeleton h-8 w-20 rounded-xl"
-                    aria-hidden
-                  />
-                ))
+                <div
+                  key={i}
+                  className="skeleton h-8 w-20 rounded-xl"
+                  aria-hidden
+                />
+              ))
               : categories.map((c) => (
-                  <button
-                    key={c}
-                    type="button"
-                    className={`rounded-xl px-3 py-1.5 text-sm font-medium transition ${
-                      categoryFilter === c
-                        ? "bg-primary text-primary-content shadow-sm"
-                        : "border border-base-300 bg-base-100 text-muted hover:text-base-content"
+                <button
+                  key={c}
+                  type="button"
+                  className={`rounded-xl px-3 py-1.5 text-sm font-medium transition ${categoryFilter === c
+                    ? "bg-primary text-primary-content shadow-sm"
+                    : "border border-base-300 bg-base-100 text-muted hover:text-base-content"
                     }`}
-                    onClick={() => setCategory(c)}
-                  >
-                    {c}
-                  </button>
-                ))}
+                  onClick={() => setCategory(c)}
+                >
+                  {c}
+                </button>
+              ))}
           </div>
         </div>
 

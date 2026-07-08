@@ -247,12 +247,15 @@ export const notifications = pgTable("notifications", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
+
+
 // cascade = “delete children when parent is deleted”; restrict = “don’t delete the parent if any child still points at it.”
 
 // a user can have many orders over time.
 export const usersRelations = relations(users, ({ many }) => ({
   orders: many(orders),
   notifications: many(notifications),
+
 }));
 
 // the same product can show up on many order lines

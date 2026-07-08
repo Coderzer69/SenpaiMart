@@ -11,12 +11,12 @@ import { clerkMiddleware } from "@clerk/express";
 import { clerkWebhookHandler } from "./webhooks/clerk";
 import { polarWebhookHandler } from "./webhooks/polar";
 import { getEnv } from "./lib/env";
-import keepAliveCron from "./lib/cron"; 
+import keepAliveCron from "./lib/cron";
 import { sentryClerkUserMiddleware } from "./middleware/sentryClerkUser";
 
 
 import productRouter from "./routes/productsRouter";
-import meRouter from"./routes/meRouter";
+import meRouter from "./routes/meRouter";
 import streamRouter from "./routes/streamRouter";
 import checkoutRouter from "./routes/checkoutRouter";
 import adminRouter from "./routes/adminRouter";
@@ -24,7 +24,7 @@ import orderRouter from "./routes/orderRouter";
 import notificationsRouter from "./routes/notificationsRouter";
 
 
-const app = express();  
+const app = express();
 const env = getEnv();
 
 const rawJson = express.raw({ type: "application/json", limit: "1mb" });
@@ -36,8 +36,8 @@ app.post("/webhooks/clerk", rawJson, (req, res) => {
   void clerkWebhookHandler(req, res);
 });
 
-app.post("/webhooks/polar",rawJson ,(req,res)=>{
-    void polarWebhookHandler (req,res)
+app.post("/webhooks/polar", rawJson, (req, res) => {
+  void polarWebhookHandler(req, res)
 });
 
 
@@ -46,17 +46,18 @@ app.use(cors());
 app.use(clerkMiddleware());
 app.use(sentryClerkUserMiddleware);
 
-app.get("/health",(_req,res)=>{
-  res.json({ok:true});
-}); 
+app.get("/health", (_req, res) => {
+  res.json({ ok: true });
+});
 
-app.use("/api/me",meRouter)
-app.use("/api/products",productRouter)
-app.use("/api/stream",streamRouter); 
-app.use("/api/checkout",checkoutRouter);
-app.use("/api/admin",adminRouter);
-app.use("/api/orders",orderRouter);
+app.use("/api/me", meRouter)
+app.use("/api/products", productRouter)
+app.use("/api/stream", streamRouter);
+app.use("/api/checkout", checkoutRouter);
+app.use("/api/admin", adminRouter);
+app.use("/api/orders", orderRouter);
 app.use("/api/notifications", notificationsRouter);
+
 
 const publicDir = path.join(process.cwd(), "public");
 
@@ -75,7 +76,7 @@ if (fs.existsSync(publicDir)) {
     }
     res.sendFile(path.join(publicDir, "index.html"), (err) => next(err));
   });
-} 
+}
 app.get("/debug-sentry", (_req: express.Request, _res: express.Response) => {
   throw new Error("My first Sentry error!");
 });

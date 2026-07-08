@@ -58,132 +58,128 @@ const Navbar = ({ sidebarOpen, onMenuToggle }) => {
       style={{ WebkitBackdropFilter: "blur(12px)" }}
     >
       {/* ── Desktop row (md+): 3-col grid ───────────────────────────────── */}
-      <div className="hidden h-[70px] items-center px-5 md:grid md:[grid-template-columns:1fr_auto_1fr]">
+      <div className="hidden h-[70px] items-center px-5 md:grid md:grid-cols-[1fr_auto_1fr]">
 
-        {/* Col 1 — Left: hamburger + logo */}
-        <div className="flex items-center gap-[14px]">
+        {/* LEFT */}
+        <div className="flex items-center gap-3">
+
+          {/* Hamburger */}
           <button
             type="button"
             id="sidebar-toggle-btn"
             onClick={onMenuToggle}
             aria-label={sidebarOpen ? "Close menu" : "Open menu"}
             aria-expanded={sidebarOpen}
-            className="group flex size-9 items-center justify-center rounded-xl text-[#6B7280] transition-all duration-300 hover:bg-black/5 hover:text-[#111827] active:scale-95"
+            className="group flex size-9 items-center justify-center rounded-xl text-[#6B7280] hover:bg-black/5"
           >
-            {sidebarOpen ? (
-              <XIcon className="size-5 transition-transform duration-300 group-hover:scale-110" aria-hidden />
-            ) : (
-              <MenuIcon className="size-5 transition-transform duration-300 group-hover:scale-110" aria-hidden />
-            )}
+            {sidebarOpen ? <XIcon className="size-5" /> : <MenuIcon className="size-5" />}
           </button>
 
+          {/* Logo */}
           <Link
             to="/"
-            className="group flex items-center gap-[10px] transition-all duration-300 active:scale-[0.97]"
+            className="group flex items-center gap-2"
             aria-label="SenpaiMart home"
           >
-            <div className="transition-transform duration-400 ease-out group-hover:-rotate-6 group-hover:scale-110">
-              <BrandLogo size={36} aria-hidden />
-            </div>
-            <span className="text-[21px] font-bold tracking-tight">
-              <span className="text-[#1E293B] transition-colors duration-300 group-hover:text-black">Senpai</span>
-              <span className="text-primary transition-colors duration-300 group-hover:text-primary/80">Mart</span>
+            <BrandLogo size={36} />
+            <span className="text-[21px] font-bold">
+              <span className="text-[#1E293B]">Senpai</span>
+              <span className="text-primary">Mart</span>
             </span>
           </Link>
+
         </div>
 
-        {/* Col 2 — Centre: search bar (truly centred via grid) */}
-        <div className="w-[min(480px,40vw)] transition-transform duration-500 ease-out">
+        {/* CENTER */}
+        <div className="w-[min(480px,40vw)]">
           <SearchBar />
         </div>
 
-        {/* Col 3 — Right: icons + user (justify to right edge) */}
-        <div className="flex items-center justify-end gap-0.5">
+        {/* RIGHT */}
+        <div className="flex items-center justify-end gap-1">
+
           {/* Wishlist */}
+
           <Link
             to="/wishlist"
-            className="group relative flex size-9 items-center justify-center rounded-xl text-[#6B7280] transition-all duration-300 hover:bg-black/5 hover:text-[#111827] active:scale-95"
-            aria-label={
-              wishlistCount > 0 ? `Wishlist, ${wishlistCount} items` : "Wishlist"
-            }
-            title="Your wishlist"
+            className="group relative flex size-9 items-center justify-center rounded-xl text-[#6B7280] hover:bg-black/5"
           >
             <HeartIcon
-              className={`size-5 transition-all duration-300 group-hover:scale-110 ${wishlistCount > 0 ? "fill-red-500 text-red-500" : ""}`}
-              aria-hidden
+              className={`size-5 ${wishlistCount > 0 ? "fill-red-500 text-red-500" : ""
+                }`}
             />
-            {wishlistCount > 0 ? (
-              <span className="absolute -right-0.5 -top-0.5 flex min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 py-px text-[10px] font-bold leading-none text-white shadow-[0_2px_8px_-2px_rgba(239,68,68,0.5)] transition-transform duration-300 group-hover:scale-110">
+
+            {wishlistCount > 0 && (
+              <span className="absolute -right-0.5 -top-0.5 rounded-full bg-red-500 px-1 text-[10px] text-white">
                 {wishlistCount > 99 ? "99+" : wishlistCount}
               </span>
-            ) : null}
+            )}
           </Link>
 
-          {/* Notifications */}
           <NotificationDropdown />
 
-          {/* Cart — desktop */}
+          {/* Cart */}
+
           <div className="relative">
+
             <button
-              type="button"
               onClick={openDrawer}
-              className="group relative flex size-9 items-center justify-center rounded-xl text-[#6B7280] transition-all duration-300 hover:bg-black/5 hover:text-[#111827] active:scale-95"
-              aria-label={cartCount > 0 ? `Cart, ${cartCount} items` : "Cart"}
+              className="group relative flex size-9 items-center justify-center rounded-xl text-[#6B7280] hover:bg-black/5"
             >
-              <ShoppingCartIcon className="size-5 transition-transform duration-300 group-hover:scale-110" aria-hidden />
-              {cartCount > 0 ? (
-                <span className="absolute -right-0.5 -top-0.5 flex min-w-[18px] items-center justify-center rounded-full bg-primary px-1 py-px text-[10px] font-bold leading-none text-white shadow-[0_2px_8px_-2px_rgba(255,107,74,0.5)] transition-transform duration-300 group-hover:scale-110">
+              <ShoppingCartIcon className="size-5" />
+
+              {cartCount > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 rounded-full bg-primary px-1 text-[10px] text-white">
                   {cartCount > 99 ? "99+" : cartCount}
                 </span>
-              ) : null}
+              )}
             </button>
+
             <CartToast />
+
           </div>
 
-          {/* Divider */}
           <div className="mx-1.5 h-6 w-px bg-base-300/60" />
 
-          {/* Auth */}
           <Show when="signed-out">
             <SignInButton mode="modal">
-              <button
-                type="button"
-                className="btn btn-primary btn-sm rounded-xl px-5 text-[13px] shadow-sm transition-all duration-300 hover:-translate-y-[1px] hover:shadow-md active:translate-y-0 active:scale-95"
-              >
+              <button className="btn btn-primary btn-sm rounded-xl">
                 Sign in
               </button>
             </SignInButton>
           </Show>
 
           <Show when="signed-in">
-            <div className="group flex cursor-pointer items-center gap-2 rounded-[14px] border border-transparent bg-transparent py-1 pl-1 pr-3 transition-all duration-300 hover:border-base-300 hover:bg-white/80 hover:shadow-[0_2px_12px_-4px_rgba(0,0,0,0.08)] active:scale-[0.98]">
-              <div className="transition-transform duration-300 group-hover:scale-105">
-                <UserButton
-                  appearance={{
-                    elements: { avatarBox: "h-7 w-7 ring-2 ring-transparent transition-all duration-300 group-hover:ring-[#E8E8ED]" },
-                  }}
-                />
-              </div>
-              <div className="min-w-0 transition-opacity duration-300 group-hover:opacity-80">
-                <p className="truncate text-xs font-semibold leading-tight text-[#111827]">
+
+            <div className="flex items-center gap-2">
+
+              <UserButton />
+
+              <div>
+
+                <p className="text-xs font-semibold">
                   Hi, {displayName}
                 </p>
-                {role === "admin" || role === "support" ? (
-                  <span className="text-[10px] font-medium capitalize text-primary">
-                    {role}
-                  </span>
-                ) : (
-                  <span className="text-[10px] text-[#6B7280]">Member</span>
-                )}
+
+                <span className="text-[10px]">
+                  {role ?? "Member"}
+                </span>
+
               </div>
+
             </div>
+
           </Show>
+
         </div>
+
       </div>
+      {/* desktop grid closes */}
 
       {/* ── Mobile layout (<md): 2 rows ────────────────────────────────── */}
       <div className="md:hidden">
-        {/* Row 1: hamburger + logo + icons */}
+
+        {/* Row 1 */}
         <div className="flex h-[70px] items-center gap-[14px] px-4">
           {/* Hamburger */}
           <button
@@ -276,12 +272,14 @@ const Navbar = ({ sidebarOpen, onMenuToggle }) => {
           </Show>
         </div>
 
-        {/* Row 2: full-width search bar */}
+        {/* Row 2 */}
         <div className="border-t border-[#F0F0F5]/50 px-4 pb-3 pt-2">
           <SearchBar />
         </div>
-      </div>
-    </header>
+
+      </div> {/* md:hidden */}
+
+    </header >
   );
 };
 

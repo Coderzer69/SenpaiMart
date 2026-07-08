@@ -208,8 +208,9 @@ export function AdminSidebar({ mobileOpen, onClose }) {
           <div className="absolute inset-y-0 left-0 w-[280px] max-w-[85vw] shadow-2xl">
             {panel}
           </div>
-        </div>
+        </div >
       ) : null}
+
     </>
   );
 }

@@ -35,11 +35,16 @@ export default function useCartPage() {
     return sum + p.priceCents * line.quantity;
   }, 0);
 
+
+
   async function checkout() {
+
+
     setCheckoutLoading(true);
 
     const body = {
       items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
+
     };
 
     const res = await apiFetch("/api/checkout", {
