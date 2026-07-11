@@ -40,8 +40,9 @@ function StoreLayout({ children }) {
 
         {/* Main content area — shifts right when sidebar is open */}
         <div
-          className="sidebar-content-area flex min-w-0 flex-1 flex-col"
-          style={{ marginLeft: sidebarOpen ? SIDEBAR_WIDTH : 0 }}
+          className={`sidebar-content-area flex min-w-0 flex-1 flex-col ${
+            sidebarOpen ? "lg:ml-[272px]" : "ml-0"
+          }`}
         >
           <div className="flex flex-1 gap-6 px-4 py-6 md:px-6 lg:gap-8">
             <main className="min-w-0 flex-1">{children}</main>
