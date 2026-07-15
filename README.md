@@ -128,9 +128,8 @@ npm run dev
 
 ## Future Improvements
 
-- Wishlist functionality
 - AI-based recommendations
-- Inventory management
 - Advanced analytics
 - Payment enhancements
+
 
