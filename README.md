@@ -110,12 +110,19 @@ npm run dev
 ## Screenshots
 
 ### Home Page
+<img width="1536" height="742" alt="image" src="https://github.com/user-attachments/assets/98c1edb2-4d65-4b83-b55a-6f226739af18" />
+
 <img width="100%" alt="Home" src="YOUR_IMAGE_LINK_HERE" />
 
 ### Product Page
+<img width="1536" height="741" alt="image" src="https://github.com/user-attachments/assets/6a5b24a8-5ef5-410a-a7e3-df5a403f1356" />
+
 <img width="100%" alt="Product" src="YOUR_IMAGE_LINK_HERE" />
 
 ### Admin Dashboard
+
+<img width="1536" height="742" alt="image" src="https://github.com/user-attachments/assets/f9e9a44c-7243-45dc-8f18-64e31bf36391" />
+
 <img width="100%" alt="Dashboard" src="YOUR_IMAGE_LINK_HERE" />
 
 ---
