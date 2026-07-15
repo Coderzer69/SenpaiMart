@@ -110,7 +110,7 @@ npm run dev
 ## Screenshots
 
 ### Home Page
-<img width="1536" height="742" alt="image" src="https://github.com/user-attachments/assets/98c1edb2-4d65-4b83-b55a-6f226739af18" />
+<img width="100%" height="742" alt="Home" src="https://github.com/user-attachments/assets/98c1edb2-4d65-4b83-b55a-6f226739af18" />
 
 <img width="100%" alt="Home" src="YOUR_IMAGE_LINK_HERE" />
 
