@@ -1,5 +1,4 @@
 # Monolith: Vite frontend + Express API. Build from repo root 
-/*-----------------------------------------------------------/*
 # --- Stage 1: build the SPA (Vite) ---
 # Produces static HTML/JS/CSS under dist/ — copied into the final image as ./public.
 FROM node:22-bookworm-slim AS frontend-build
